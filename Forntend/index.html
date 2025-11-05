@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP Final</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+</head>
+<body class="bg-secondary">
+    <div class="text-center p-5">
+        <h1 class="text-black">Trabajo FInal de Estadistica</h1>
+    </div>
+
+    <!-- Tabla -->
+    <div>
+        <table class="table mx-3 table-primary">
+            <thead>
+                <tr>
+                    <th class="scope">ID</td>
+                    <th class="scope">Fecha</td>
+                    <th class="scope">Cliente</td>
+                    <th class="scope">Producto</td>
+                    <th class="scope">Cantidad</td>
+                    <th class="scope">Precio por Producto</td>
+                    <th class="scope">Pago</td>
+                    <th class="scope">Total</td>
+                </tr>
+            </th>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Boton Modal -->
+    <div class="d-flex justify-content-end m-3 ">
+        <button type="button" class=" btn btn-primary p-3 fs-4" data-bs-toggle="modal" data-bs-target="#addModal" style="letter-spacing: 0.2rem;">Agregar Venta</button>
+    </div>
+
+    <!-- Dashboard Graph -->
+     
+
+    <!-- Modal -->
+    <div class="modal fade" tabindex="-1" id="addModal" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agrega una venta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <select type="number" name="" id=""></select>
+                    <select type="number" name="" id=""></select>
+                    <select type="text" name="" id=""></select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graficos -->
+    <div class="d-flex justify-content-center row mt-3">
+        <div class="col col-md-7">
+            <canvas class="bg-white rounded h-100" id="myChart"></canvas>
+        </div>
+        <div class="col col-md-4">
+            <canvas class="bg-white rounded h-100" id="doughnut"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    
+    <!-- Conection to script -->
+    <script src="script.js"></script>
+</body>
+</html>

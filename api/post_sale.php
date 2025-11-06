@@ -14,10 +14,22 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
+
+if (!is_array($data)) {
+    http_response_code(400);
+    echo json_encode([
+        "status" => "error",
+        "message" => "Invalid JSON format"
+    ]);
+    exit();
+}
+
 $requiredFields = ['client_id', 'client_name', 'product_id', 'sale_quantity', 'unit_price', 'payment_id'];
 
 foreach ($requiredFields as $field) {
-    if (empty($_POST[$field])) {
+    if (empty($data[$field])) {
         http_response_code(400);
         echo json_encode([
             "status" => "error",
@@ -27,13 +39,13 @@ foreach ($requiredFields as $field) {
     }
 }
 
-$client_id      = intval($_POST['client_id']);
-$client_name    = trim($_POST['client_name']);
-$product_id     = intval($_POST['product_id']);
-$sale_quantity  = intval($_POST['sale_quantity']);
-$unit_price     = floatval($_POST['unit_price']);
-$payment_id     = intval($_POST['payment_id']);
-$sale_date      = date('Y-m-d H:i:s'); 
+$client_id      = intval($data['client_id']);
+$client_name    = trim($data['client_name']);
+$product_id     = intval($data['product_id']);
+$sale_quantity  = intval($data['sale_quantity']);
+$unit_price     = floatval($data['unit_price']);
+$payment_id     = intval($data['payment_id']);
+$sale_date      = date('Y-m-d H:i:s');
 
 $nameParts = explode(" ", $client_name);
 $client_firstName = $nameParts[0] ?? '';

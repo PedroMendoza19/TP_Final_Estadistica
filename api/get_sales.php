@@ -22,6 +22,7 @@ $sql = "SELECT
   s.sale_date,
   c.first_name,
   c.last_name,
+  c.client_id,
   p.name,
   s.quantity,
   s.unit_price,

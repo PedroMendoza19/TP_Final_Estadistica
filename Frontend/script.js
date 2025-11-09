@@ -1,4 +1,4 @@
-const API_URL = './api/get_sales.php';
+const API_URL = 'http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_sales.php';
 
 const ctx = document.getElementById('myChart');
     

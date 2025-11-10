@@ -1,3 +1,5 @@
+const API_URL = 'http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_sales.php';
+
 const ctx = document.getElementById('myChart');
     
 new Chart(ctx, {
@@ -41,3 +43,14 @@ new Chart(doughnut,{
   }]
 }
 })
+
+fetch(API_URL)
+.then(response=>{
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    return response.json();
+})
+.then(data=>{
+    console.log("Clientes", data);
+    
+})
+.catch(error => console.error("Error al obtener clientes", error));

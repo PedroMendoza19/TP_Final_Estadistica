@@ -58,22 +58,22 @@ function averageByDay($result)
         if (!isset($statsByDay[$sale_date])) {
             $statsByDay[$sale_date] = [
                 'total' => $day_total,
-                'count' => 1          
+                'count' => 1
             ];
         } else {
             $statsByDay[$sale_date]['total'] += $day_total;
             $statsByDay[$sale_date]['count']++;
         }
     }
-    
+
     $finalAverages = [];
-    
+
     foreach ($statsByDay as $day => $stats) {
         if ($stats['count'] > 0) {
             $finalAverages[$day] = $stats['total'] / $stats['count'];
         }
     }
-    
+
     return $finalAverages;
 }
 
@@ -82,28 +82,28 @@ function averageByProduct($result)
     $statsByProduct = [];
 
     foreach ($result as $sale) {
-        $product = $sale["name"]; 
+        $product = $sale["name"];
         $day_total = floatval($sale["total"]);
 
         if (!isset($statsByProduct[$product])) {
             $statsByProduct[$product] = [
                 'total' => $day_total,
-                'count' => 1          
+                'count' => 1
             ];
         } else {
             $statsByProduct[$product]['total'] += $day_total;
             $statsByProduct[$product]['count']++;
         }
     }
-    
+
     $finalAverages = [];
-    
+
     foreach ($statsByProduct as $product => $stats) {
         if ($stats['count'] > 0) {
             $finalAverages[$product] = $stats['total'] / $stats['count'];
         }
     }
-    
+
     return $finalAverages;
 }
 
@@ -112,28 +112,28 @@ function averageByClient($result)
     $statsByClient = [];
 
     foreach ($result as $sale) {
-        $client = $sale["first_name"]." ".$sale["last_name"]; 
+        $client = $sale["first_name"] . " " . $sale["last_name"];
         $day_total = floatval($sale["total"]);
 
         if (!isset($statsByClient[$client])) {
             $statsByClient[$client] = [
                 'total' => $day_total,
-                'count' => 1          
+                'count' => 1
             ];
         } else {
             $statsByClient[$client]['total'] += $day_total;
             $statsByClient[$client]['count']++;
         }
     }
-    
+
     $finalAverages = [];
-    
+
     foreach ($statsByClient as $client => $stats) {
         if ($stats['count'] > 0) {
             $finalAverages[$client] = $stats['total'] / $stats['count'];
         }
     }
-    
+
     return $finalAverages;
 }
 

@@ -3,13 +3,20 @@ const API_URL_GET =
 
 const API_URL_ADD =   "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_sale.php";
 const API_URL_PAYMENT_METHOD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_payment_methods.php";
+const API_URL_PRODUCTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_products.php";
 
 
 let allSales = [];
 let barChart, doughnutChart;
+let selectsLoaded = false;
+let productsData = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   loadSales();
+  loadPayMethodSelect();
+
+  const filterSelect = document.getElementById('filterPayment');
+  filterSelect.addEventListener("change",filterSalesByPayment)
 });
 
 function loadSales() {
@@ -35,14 +42,14 @@ function loadSales() {
     });
 }
 
-async function loadModalSelects() {
+async function loadPayMethodSelect() {
   await fetch(API_URL_PAYMENT_METHOD)
   .then((response)=>{
     if (!response.ok) throw new Error("Error en la respuesta del servidor");
     return response.json();
   })
   .then((data)=>{
-    const paymentSelect = document.getElementById("paymentSelect");
+    const paymentSelect = document.getElementById("filterPayment");
     
     for (let i = 0; i < data.data.length; i++) {
       const newOption = document.createElement("option");
@@ -51,11 +58,117 @@ async function loadModalSelects() {
       paymentSelect.appendChild(newOption);
     }    
     
+  }).catch((error)=>{
+    console.error("Error al cargar paymentSelect")
   })
 }
 
-function addSale() {
+function filterSalesByPayment(){
+  const filterSelect = document.getElementById('filterPayment')
+  const selectedPayment = filterSelect.value;
+
+  const tableRow = document.querySelectorAll('table tbody tr');
+
+  tableRow.forEach(row =>{
+    const paymentCell = row.querySelector("td:nth-child(7)");
+    const paymentValue = paymentCell.textContent.trim();
+
+    if (selectedPayment === "" || paymentValue === selectedPayment){
+      row.style.display = "";
+    }else{
+      row.style.display = "none";
+    }
+  })
+
+}
+
+async function loadModalSelects() {
+  if (selectsLoaded) return; 
   
+  await fetch(API_URL_PAYMENT_METHOD)
+  .then((response)=>{
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    return response.json();
+   })
+   .then((data)=>{
+     const paymentSelect = document.getElementById("paymentSelect");
+  
+     for (let i = 0; i < data.data.length; i++) {
+       const newOption = document.createElement("option");
+       newOption.value = data.data[i].payment_name;
+       newOption.text =  data.data[i].payment_name;
+       paymentSelect.appendChild(newOption);
+     }    
+  
+   }).catch((error)=>{
+     console.error("Error al cargar paymentSelect")
+   })
+
+  await fetch(API_URL_PRODUCTS)
+  .then((response)=>{
+    if (!response.ok)  throw new Error("Error en la respuesta del servidor");
+    return response.json();
+  })
+  .then((data)=>{
+    productsData = data.data;
+    const productSelect = document.getElementById("productSelect")
+
+    for (let i = 0; i < data.data.length; i++) {
+      const newOption = document.createElement("option");
+      newOption.value = data.data[i].product_id;
+      newOption.text = data.data[i].name;
+      newOption.dataset.price = data.data[i].unit_price;
+      newOption.dataset.name = data.data[i].name;
+      productSelect.appendChild(newOption);
+    }
+  })
+  .catch((error)=>{
+    console.error("Error al cargar productSelect")
+  })
+
+  selectsLoaded = true;
+}
+
+function updateUnitPrice(){
+  const productSelect = document.getElementById('productSelect');
+  const selectedOption = productSelect.options[productSelect.selectedIndex];
+  const unitPriceInput = document.getElementById('unitPriceInput');
+
+  if(selectedOption.value){
+    const price = parseFloat(selectedOption.dataset.price);
+    unitPriceInput.value = `$${price.toFixed(2)}`;
+  }else {
+    unitPriceInput.value = '';
+  }
+
+  calcularTotal();
+}
+
+function calcularTotal(){
+  const productSelect = document.getElementById('productSelect');
+  const selectedOption = productSelect.options[productSelect.selectedIndex];
+  const quantity = parseFloat(document.getElementById('quantityInput').value) || 0;
+  const totalPreview = document.getElementById('totalPreview');
+
+  if(selectedOption.value && quantity > 0){
+    const unitPrice = parseFloat(selectedOption.dataset.price);
+    const total = unitPrice * quantity;
+    totalPreview.textContent = `$${total.toFixed(2)}`;
+
+  }else{
+    totalPreview.textContent = "$0.00"
+  }
+}
+
+async function LoadUnitPrice() {
+  
+}
+
+function addSale() {
+  const client = document.getElementById('clientName').value;
+  const product = document.getElementById('productSelect').value;
+  const quantity = document.getElementById('quantityInput').value;
+  const unit_price = document.  
 
 
   fetch(API_URL_ADD, {

@@ -76,7 +76,7 @@
                     <option value="">Todos los pagos</option>
                 </select>
             </div>
-            <button class="btn btn-primary btn-add-sales mt-3" data-bs-toggle="modal" data-bs-target="#addModal">
+            <button class="btn btn-primary btn-add-sales mt-3" data-bs-toggle="modal" data-bs-target="#addModal" onclick="loadModalSelects()">
                 <i class="fas fa-plus me-2"></i>Agregar Venta
             </button>
         </div>
@@ -140,9 +140,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Cliente</label>
-                        <select id="clientSelect" class="form-select">
-                            <option value="">Seleccione un cliente...</option>
-                        </select>
+                        <input type="text" placeholder="Nombre Cliente" class="form-control" aria-label="Nombre" aria-describedby="addon-wrapping">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Producto</label>
@@ -153,6 +151,9 @@
                     <div class="mb-3">
                         <label class="form-label">Cantidad</label>
                         <input type="number" class="form-control" id="quantityInput" min="1" value="1">
+                    </div>
+                    <div class="mb-3">
+                        
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Método de Pago</label>

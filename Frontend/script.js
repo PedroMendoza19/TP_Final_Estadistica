@@ -1,6 +1,10 @@
 const API_URL_GET =
   "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_sales.php";
 
+const API_URL_ADD =   "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_sale.php";
+const API_URL_PAYMENT_METHOD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_payment_methods.php";
+
+
 let allSales = [];
 let barChart, doughnutChart;
 
@@ -15,7 +19,6 @@ function loadSales() {
       return response.json();
     })
     .then((data) => {
-      console.log("Clientes", data);
       if (data.status === "ok") {
         allSales = data.data;
         displaySales(allSales);
@@ -30,6 +33,45 @@ function loadSales() {
         '<i class="fas fa-exclamation-triangle fa-3x mb-3"></i>' +
         "<p>Error al cargar las ventas</p></td></tr>";
     });
+}
+
+async function loadModalSelects() {
+  await fetch(API_URL_PAYMENT_METHOD)
+  .then((response)=>{
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    return response.json();
+  })
+  .then((data)=>{
+    const paymentSelect = document.getElementById("paymentSelect");
+    
+    for (let i = 0; i < data.data.length; i++) {
+      const newOption = document.createElement("option");
+      newOption.value = data.data[i].payment_name;
+      newOption.text =  data.data[i].payment_name;
+      paymentSelect.appendChild(newOption);
+    }    
+    
+  })
+}
+
+function addSale() {
+  
+
+
+  fetch(API_URL_ADD, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type" : "aplication/json"
+    }
+  })
+  .then((response)=>{
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    return response.json();
+  })
+  .catch((error)=>{
+    console.error("Error al agregar un producto", error)
+  })
 }
 
 function displaySales(sales) {
@@ -178,7 +220,3 @@ function formatDate(dateString) {
   });
 }
 
-// Función para agregar venta (placeholder)
-function addSale() {
-  alert("Función de agregar venta - Conectar con tu API de inserción");
-}

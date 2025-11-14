@@ -72,7 +72,7 @@ if ($result && $result->num_rows > 0) {
     $stmt->close();
     $parts = preg_split('/\s+/', $name, 2);
     $first = $parts[0];
-    $last  = $parts[1] ?? '';
+    $last = $parts[1] ?? '';
 
     $stmt = $conn->prepare("
         SELECT client_id FROM clients
@@ -98,17 +98,17 @@ if ($result && $result->num_rows > 0) {
     }
 }
 
-$client_id      = intval($data['client_id']);
-$client_name    = trim($data['client_name']);
-$product_id     = intval($data['product_id']);
-$sale_quantity  = intval($data['sale_quantity']);
-$unit_price     = floatval($data['unit_price']);
-$payment_id     = intval($data['payment_id']);
-$sale_date      = date('Y-m-d H:i:s');
+$client_id = intval($data['client_id']);
+$client_name = trim($data['client_name']);
+$product_id = intval($data['product_id']);
+$sale_quantity = intval($data['sale_quantity']);
+$unit_price = floatval($data['unit_price']);
+$payment_id = intval($data['payment_id']);
+$sale_date = date('Y-m-d H:i:s');
 
 $nameParts = explode(" ", $client_name);
 $client_firstName = $nameParts[0] ?? '';
-$client_lastName  = $nameParts[1] ?? '';
+$client_lastName = $nameParts[1] ?? '';
 
 $stmt = $conn->prepare("SELECT stock FROM products WHERE product_id = ?");
 $stmt->bind_param("i", $product_id);
@@ -152,7 +152,7 @@ if ($stmt->execute()) {
         "status" => "success",
         "message" => "Sale registered successfully",
         "data" => [
-            "sale_id"=> $conn->insert_id,
+            "sale_id" => $conn->insert_id,
             "sale_date" => $sale_date,
             "client_firstName" => $client_firstName,
             "client_lastName" => $client_lastName,

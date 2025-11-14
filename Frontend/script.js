@@ -1,7 +1,7 @@
 const API_URL_GET =
   "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_sales.php";
 
-const API_URL_ADD =   "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_sale.php";
+const API_URL_ADD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_sale.php";
 const API_URL_PAYMENT_METHOD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_payment_methods.php";
 const API_URL_PRODUCTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_products.php";
 const API_URL_ADD_CLIENT = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_client.php";
@@ -12,15 +12,14 @@ let allSales = [];
 let barChart, doughnutChart;
 let selectsLoaded = false;
 let productsData = [];
-let zones = [];
+let zonesData = [];
 const paymentMethodsData = {};
-const zonesData = {};
 document.addEventListener("DOMContentLoaded", () => {
   loadSales();
   loadPayMethodSelect();
 
   const filterSelect = document.getElementById('filterPayment');
-  filterSelect.addEventListener("change",filterSalesByPayment)
+  filterSelect.addEventListener("change", filterSalesByPayment)
 });
 
 function loadSales() {
@@ -48,39 +47,39 @@ function loadSales() {
 
 async function loadPayMethodSelect() {
   await fetch(API_URL_PAYMENT_METHOD)
-  .then((response)=>{
-    if (!response.ok) throw new Error("Error en la respuesta del servidor");
-    return response.json();
-  })
-  .then((data)=>{
-    const paymentSelect = document.getElementById("filterPayment");
-    
-    for (let i = 0; i < data.data.length; i++) {
-      const newOption = document.createElement("option");
-      newOption.value = data.data[i].payment_name;
-      newOption.text =  data.data[i].payment_name;
-      paymentSelect.appendChild(newOption);
-      paymentMethodsData[data.data[i].payment_name] = data.data[i];      
-    }    
-    
-  }).catch((error)=>{
-    console.error("Error al cargar paymentSelect")
-  })
+    .then((response) => {
+      if (!response.ok) throw new Error("Error en la respuesta del servidor");
+      return response.json();
+    })
+    .then((data) => {
+      const paymentSelect = document.getElementById("filterPayment");
+
+      for (let i = 0; i < data.data.length; i++) {
+        const newOption = document.createElement("option");
+        newOption.value = data.data[i].payment_name;
+        newOption.text = data.data[i].payment_name;
+        paymentSelect.appendChild(newOption);
+        paymentMethodsData[data.data[i].payment_name] = data.data[i];
+      }
+
+    }).catch((error) => {
+      console.error("Error al cargar paymentSelect")
+    })
 }
 
-function filterSalesByPayment(){
+function filterSalesByPayment() {
   const filterSelect = document.getElementById('filterPayment')
   const selectedPayment = filterSelect.value;
 
   const tableRow = document.querySelectorAll('table tbody tr');
 
-  tableRow.forEach(row =>{
+  tableRow.forEach(row => {
     const paymentCell = row.querySelector("td:nth-child(7)");
     const paymentValue = paymentCell.textContent.trim();
 
-    if (selectedPayment === "" || paymentValue === selectedPayment){
+    if (selectedPayment === "" || paymentValue === selectedPayment) {
       row.style.display = "";
-    }else{
+    } else {
       row.style.display = "none";
     }
   })
@@ -88,155 +87,171 @@ function filterSalesByPayment(){
 }
 
 function loadModalSelects() {
-  if (selectsLoaded) return; 
-  
+  if (selectsLoaded) return;
+
   fetch(API_URL_PAYMENT_METHOD)
-  .then((response)=>{
-    if (!response.ok) throw new Error("Error en la respuesta del servidor");
-    return response.json();
-   })
-  .then((data)=>{
-     const paymentSelect = document.getElementById("paymentSelect");
-  
-    for (let i = 0; i < data.data.length; i++) {
-      const newOption = document.createElement("option");
-      newOption.value = data.data[i].payment_name;
-      newOption.text =  data.data[i].payment_name;
-      paymentSelect.appendChild(newOption);
-    }    
-  }).catch((error)=>{
-    console.error("Error al cargar paymentSelect")
-  })
+    .then((response) => {
+      if (!response.ok) throw new Error("Error en la respuesta del servidor");
+      return response.json();
+    })
+    .then((data) => {
+      const paymentSelect = document.getElementById("paymentSelect");
+
+      for (let i = 0; i < data.data.length; i++) {
+        const newOption = document.createElement("option");
+        newOption.value = data.data[i].payment_name;
+        newOption.text = data.data[i].payment_name;
+        paymentSelect.appendChild(newOption);
+      }
+    }).catch((error) => {
+      console.error("Error al cargar paymentSelect")
+    })
 
   fetch(API_URL_PRODUCTS)
-  .then((response)=>{
-    if (!response.ok)  throw new Error("Error en la respuesta del servidor");
-    return response.json();
-  })
-  .then((data)=>{
-    productsData = data.data;
-    const productSelect = document.getElementById("productSelect")
+    .then((response) => {
+      if (!response.ok) throw new Error("Error en la respuesta del servidor");
+      return response.json();
+    })
+    .then((data) => {
+      productsData = data.data;
+      const productSelect = document.getElementById("productSelect")
 
-    for (let i = 0; i < productsData.length; i++) {
-      const newOption = document.createElement("option");
-      newOption.value = productsData[i].product_id;
-      newOption.text = productsData[i].name;
-      newOption.dataset.price = productsData[i].unit_price;
-      newOption.dataset.name = productsData[i].name;
-      productSelect.appendChild(newOption);
-    }
-  })
-  .catch((error)=>{
-    console.error("Error al cargar productSelect", error)
-  })
+      for (let i = 0; i < productsData.length; i++) {
+        const newOption = document.createElement("option");
+        newOption.value = productsData[i].product_id;
+        newOption.text = productsData[i].name;
+        newOption.dataset.price = productsData[i].unit_price;
+        newOption.dataset.name = productsData[i].name;
+        productSelect.appendChild(newOption);
+      }
+    })
+    .catch((error) => {
+      console.error("Error al cargar productSelect", error)
+    })
 
   fetch(API_URL_ZONES)
-  .then((response)=> {
-    if(!response.ok) throw new Error("Error en la respuesta del servidor");
-    return response.json();
-  })
-  .then((data)=>{
-  zones = data.data;
-  const zonesSelect = document.getElementById('zoneSelect');
-  
-  for (let i = 0; i < zones.length; i++) {
-    const newOption = document.createElement("option");      
-    newOption.value = zones[i].zone_name;
-    newOption.text = zones[i].zone_name;
-    zonesSelect.appendChild(newOption);
-    zonesData[data.data[i].zone_name] = data.data[i];      
-    
-  }
+    .then((response) => {
+      if (!response.ok) throw new Error("Error en la respuesta del servidor");
+      return response.json();
+    })
+    .then((data) => {
+      let zones = data.data;
 
-  }).catch((error)=>{
-    console.error("Error al cargar zoneSelect", error)
-  })
+      const zonesSelect = document.getElementById('zoneSelect');
+
+      zones.forEach((zone) => {
+        const newOption = document.createElement("option");
+        newOption.value = zone.zone_id;
+        newOption.text = zone.zone_name;
+        zonesSelect.appendChild(newOption);
+        zonesData[zone.zone_id] = zone;
+      });
+
+    }).catch((error) => {
+      console.error("Error al cargar zoneSelect", error)
+    })
 
   selectsLoaded = true;
 }
 
 
 
-function updateUnitPrice(){
+function updateUnitPrice() {
   const productSelect = document.getElementById('productSelect');
   const selectedOption = productSelect.options[productSelect.selectedIndex];
   const unitPriceInput = document.getElementById('unitPriceInput');
 
-  if(selectedOption.value){
+  if (selectedOption.value) {
     const price = parseFloat(selectedOption.dataset.price);
     unitPriceInput.value = `$${price.toFixed(2)}`;
-  }else {
+  } else {
     unitPriceInput.value = '';
   }
 
   calcularTotal();
 }
 
-function calcularTotal(){
+function calcularTotal() {
   const productSelect = document.getElementById('productSelect');
   const selectedOption = productSelect.options[productSelect.selectedIndex];
   const quantity = parseFloat(document.getElementById('quantityInput').value) || 0;
   const totalPreview = document.getElementById('totalPreview');
 
-  if(selectedOption.value && quantity > 0){
+  if (selectedOption.value && quantity > 0) {
     const unitPrice = parseFloat(selectedOption.dataset.price);
     const total = unitPrice * quantity;
     totalPreview.textContent = `$${total.toFixed(2)}`;
 
-  }else{
+  } else {
     totalPreview.textContent = "$0.00"
   }
 }
 
-function addClient(){
+function addClient() {
   const first_name = document.getElementById('firstName').value;
   const last_name = document.getElementById('lastName').value;
   const email = document.getElementById('email').value;
   const age = document.getElementById('age').value;
-  const zoneSelect = document.getElementById('zoneSelect');
-  const selectedZone = zoneSelect.options[zoneSelect.selectedIndex];
-
-  if(!first_name|| !last_name|| !email|| !age|| !zoneSelect.value) {
+  const zoneSelect = document.getElementById('zoneSelect').value;
+  let zoneSelectedid;
+  if (!first_name || !last_name || !email || !age || !zoneSelect) {
     alert('Porfavor completa los campos');
     return;
   }
+
+  zonesData.forEach((zone) => {
+    if (zone.zone_id == zoneSelect) {
+      zoneSelectedid = zone.zone_id;
+    }
+  });
+
+
 
   const data = {
     first_name: first_name,
     last_name: last_name,
     email: email,
     age: age,
-    zone_id: zonesData[zones].zone_id,
+    zone_id: zoneSelectedid
   }
+
 
   fetch(API_URL_ADD_CLIENT, {
     method: "POST",
     body: JSON.stringify(data),
     headers: {
-      "Content-Type" : "application/json"
+      "Content-Type": "application/json; "
     }
   })
-  .then((response)=>{
-    if(!response.ok) throw new Error('Error en la respuesta del servidro')
-      return response.json();
-  })
-  .then((data)=>{
-    console.log("Cliente agregada exitosamente: ", data);
+    .then((response) => {
+      if (!response.ok) {
+        if (response.status === 409) {
+          alert('El email ya está registrado. Por favor, utiliza otro email.');
+          return;
+        }
+      }
+      return response.json().then((data) => {
+        console.log("Cliente agregada exitosamente: ", data);
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addClientModal'));
-    modal.hide();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addClientModal'));
+        modal.hide();
 
-    document.getElementById('firstName').value = "";
-    document.getElementById('lastname').value = "";
-    document.getElementById('email').value = "";
-    document.getElementById('age').value = "";
-    document.getElementById('zoneSelect').value = "";
+        document.getElementById('firstName').value = "";
+        document.getElementById('lastName').value = "";
+        document.getElementById('email').value = "";
+        document.getElementById('age').value = "";
+        document.getElementById('zoneSelect').value = "";
 
-    alert('Cliente registrado/a correctamente!!');
-  })
+        alert('Cliente registrado/a correctamente!!');
+      })
+        .catch((error) => {
+          console.error("Error al agregar un cliente", error)
+        })
+    })
+
 }
 
-function addSale(){
+function addSale() {
   const clientName = document.getElementById('clientName').value;
   const productSelect = document.getElementById('productSelect');
   const selectedProduct = productSelect.options[productSelect.selectedIndex];
@@ -256,42 +271,46 @@ function addSale(){
     unit_price: parseFloat(selectedProduct.dataset.price),
     payment_id: paymentMethodsData[paymentMethod].payment_id,
   };
-  console.log(data);
-  
+
   fetch(API_URL_ADD, {
     method: "POST",
     body: JSON.stringify(data),
     headers: {
-      "Content-Type" : "application/json"
+      "Content-Type": "application/json"
     }
   })
-  .then((response)=>{
-    if (!response.ok) throw new Error("Error en la respuesta del servidor");
-    return response.json();
-  })
-  .then((responseData)=>{
-    console.log("Venta agregada exitosamente: ",responseData);
-    
-    loadSales();
+    .then((response) => {
+      if (!response.ok) {
+        if (response.status === 400) {
+          alert('Stock insuficiente para la cantidad solicitada.');
+          return;
+        }
+      } else {
+        return response.json().then(() => {
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
-    modal.hide();
+          loadSales();
 
-    document.getElementById('clientName').value = "";
-    document.getElementById('productSelect').value = "";
-    document.getElementById('quantityInput').value = "1";
-    document.getElementById('paymentSelect').value = "";
-    document.getElementById('unitPriceInput').value = "";
-    document.getElementById('totalPreview').textContent = "$0.00";
+          const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+          modal.hide();
 
-    alert('Venta registrada correctamente!!');
-  })
-  .catch((error)=>{
-    console.error("Error al agregar un producto", error)
-  })
+          document.getElementById('clientName').value = "";
+          document.getElementById('productSelect').value = "";
+          document.getElementById('quantityInput').value = "1";
+          document.getElementById('paymentSelect').value = "";
+          document.getElementById('unitPriceInput').value = "";
+          document.getElementById('totalPreview').textContent = "$0.00";
+
+          alert('Venta registrada correctamente!!');
+        })
+          .catch((error) => {
+            console.error("Error al agregar un producto", error)
+          });
+      }
+    })
+
 }
 
-document.addEventListener("DOMContentLoaded", ()=>{
+document.addEventListener("DOMContentLoaded", () => {
   const productSelect = document.getElementById('productSelect');
   const quantityInput = document.getElementById('quantityInput');
 
@@ -300,7 +319,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   quantityInput.addEventListener('input', calcularTotal);
 
   const addModal = document.getElementById('addModal');
-  if(addModal) addModal.addEventListener('show.bs.modal',loadModalSelects);
+  if (addModal) addModal.addEventListener('show.bs.modal', loadModalSelects);
 });
 
 
@@ -323,12 +342,11 @@ function displaySales(sales) {
           <td>${sale.name}</td>
           <td>${sale.quantity}</td>
           <td>$${parseFloat(sale.unit_price).toFixed(2)}</td>
-          <td><span class="badge badge-payment bg-info">${
-            sale.payment_name
-          }</span></td>
+          <td><span class="badge badge-payment bg-info">${sale.payment_name
+        }</span></td>
           <td class="text-end"><strong>$${parseFloat(
-            sale.total
-          ).toFixed(2)}</strong></td>
+          sale.total
+        ).toFixed(2)}</strong></td>
       </tr>
         `
     )

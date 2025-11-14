@@ -51,7 +51,7 @@ function calcPriceCount($sales) {
     //Variante de Precio por unidad
     $sumPowPrice = 0;
     foreach ($sales as $sale) {
-        $sumPowPrice+= pow($sale['unit_price'] - $sumPriceAverage ,2)
+        $sumPowPrice+= pow($sale['unit_price'] - $sumPriceAverage ,2);
     }
     
     //Variante de cantidad

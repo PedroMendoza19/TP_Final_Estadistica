@@ -1,9 +1,14 @@
 <?php
 require_once 'conn.php';
 
-header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Methods: POST,OPTIONS");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: http://127.0.0.1:5500");
+header("Access-Control-Allow-Headers:*");
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -13,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     ]);
     exit();
 }
+
 
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
@@ -26,7 +32,7 @@ if (!is_array($data)) {
     exit();
 }
 
-$requiredFields = ['client_id', 'client_name', 'product_id', 'sale_quantity', 'unit_price', 'payment_id'];
+$requiredFields = ['client_name', 'product_id', 'sale_quantity', 'unit_price', 'payment_id'];
 
 foreach ($requiredFields as $field) {
     if (empty($data[$field])) {
@@ -34,6 +40,59 @@ foreach ($requiredFields as $field) {
         echo json_encode([
             "status" => "error",
             "message" => "Missing required field: $field"
+        ]);
+        exit();
+    }
+}
+
+$name = trim($data['client_name']);
+if ($name === '') {
+    http_response_code(400);
+    echo json_encode([
+        "status" => "error",
+        "message" => "Empty client_name"
+    ]);
+    exit();
+}
+
+$stmt = $conn->prepare("
+    SELECT client_id FROM clients
+    WHERE CONCAT(IFNULL(first_name, ''), ' ', IFNULL(last_name, '')) = ?
+    LIMIT 1
+");
+$stmt->bind_param("s", $name);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $data['client_id'] = $row['client_id'];
+    $stmt->close();
+} else {
+    $stmt->close();
+    $parts = preg_split('/\s+/', $name, 2);
+    $first = $parts[0];
+    $last  = $parts[1] ?? '';
+
+    $stmt = $conn->prepare("
+        SELECT client_id FROM clients
+        WHERE first_name = ? AND last_name = ?
+        LIMIT 1
+    ");
+    $stmt->bind_param("ss", $first, $last);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $data['client_id'] = $row['client_id'];
+        $stmt->close();
+    } else {
+        $stmt->close();
+        http_response_code(404);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Client not found"
         ]);
         exit();
     }

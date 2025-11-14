@@ -10,7 +10,7 @@ let allSales = [];
 let barChart, doughnutChart;
 let selectsLoaded = false;
 let productsData = [];
-
+const paymentMethodsData = {};
 document.addEventListener("DOMContentLoaded", () => {
   loadSales();
   loadPayMethodSelect();
@@ -56,6 +56,7 @@ async function loadPayMethodSelect() {
       newOption.value = data.data[i].payment_name;
       newOption.text =  data.data[i].payment_name;
       paymentSelect.appendChild(newOption);
+      paymentMethodsData[data.data[i].payment_name] = data.data[i];      
     }    
     
   }).catch((error)=>{
@@ -176,16 +177,17 @@ function addSale(){
     client_name: clientName,
     product_id: productSelect.value,
     productName: selectedProduct.dataset.name,
-    quantity: parseInt(quantity),
+    sale_quantity: parseInt(quantity),
     unit_price: parseFloat(selectedProduct.dataset.price),
-    payment_name: paymentMethod,
+    payment_id: paymentMethodsData[paymentMethod].payment_id,
   };
-
+  console.log(data);
+  
   fetch(API_URL_ADD, {
     method: "POST",
     body: JSON.stringify(data),
     headers: {
-      "Content-Type" : "aplication/json"
+      "Content-Type" : "application/json"
     }
   })
   .then((response)=>{
@@ -203,7 +205,7 @@ function addSale(){
     document.getElementById('clientName').value = "";
     document.getElementById('productSelect').value = "";
     document.getElementById('quantityInput').value = "1";
-    document.getElementById('patmentSelect').value = "";
+    document.getElementById('paymentSelect').value = "";
     document.getElementById('unitPriceInput').value = "";
     document.getElementById('totalPreview').textContent = "$0.00";
 

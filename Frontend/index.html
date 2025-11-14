@@ -68,22 +68,23 @@
             </div>
         </div>
 
-        <!-- Barra de acciones -->
-        <div class="d-felx justify-content-center align-items-center mb-4">
-            <div class="d-flex gap-2">
-                <input type="text" class="form-control search-box" id="searchInput" placeholder="Buscar por cliente o producto...">
-                <select id="filterPayment" class="form-select" style="max-width: 200px;">
-                    <option value="">Todos los pagos</option>
-                </select>
-            </div>
-            <button class="btn btn-primary btn-add-sales m-3" data-bs-toggle="modal" data-bs-target="#addModal">
-                <i class="fas fa-plus me-2"></i>Agregar Venta
-            </button>
-        </div>
+        
 
         <!-- Tabla de Ventas -->
         <div class="table-container">
             <h4 class="mb-3"><i class="fas fa-table me-2"></i>Registro de Ventas</h4>
+            <!-- Barra de acciones -->
+            <div class="mb-4">
+                <div class="d-flex gap-2" style="height: 50px;">
+                    <input type="text" class="form-control search-box" id="searchInput" placeholder="Buscar por cliente o producto..." style="width: 910px;">
+                    <select id="filterPayment" class="form-select" style="max-width: 200px;">
+                        <option value="">Todos los pagos</option>
+                    </select>
+                    <button class="btn btn-primary btn-add-sales ms-3 me-md-2" data-bs-toggle="modal" data-bs-target="#addModal" onclick="loadModalSelects()">
+                        <i class="fas fa-plus me-2"></i>Agregar Venta
+                    </button>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead>
@@ -122,8 +123,8 @@
             </div>
             <div class="col-lg-4">
                 <div class="chart-container">
-                    <h5 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Metodos de Pago</h5>
-                    <canvas id="doughnut"></canvas>
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Metodos de Pago</h5>
+                    <canvas id="doughnut" class="mb-4"></canvas>
                 </div>
             </div>
         </div>
@@ -140,9 +141,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Cliente</label>
-                        <select id="clientSelect" class="form-select">
-                            <option value="">Seleccione un cliente...</option>
-                        </select>
+                        <input type="text" placeholder="Nombre Cliente" class="form-control" aria-label="Nombre" aria-describedby="addon-wrapping" id="clientName">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Producto</label>
@@ -153,6 +152,10 @@
                     <div class="mb-3">
                         <label class="form-label">Cantidad</label>
                         <input type="number" class="form-control" id="quantityInput" min="1" value="1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Precio Unitario</label>
+                        <input type="text" class="form-control" id="unitPriceInput" readonly style="background-color: #e9ecef;">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Método de Pago</label>

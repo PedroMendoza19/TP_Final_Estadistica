@@ -1,11 +1,22 @@
 const API_URL_GET =
   "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_sales.php";
 
+const API_URL_ADD =   "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_sale.php";
+const API_URL_PAYMENT_METHOD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_payment_methods.php";
+const API_URL_PRODUCTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_products.php";
+
+
 let allSales = [];
 let barChart, doughnutChart;
+let selectsLoaded = false;
+let productsData = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   loadSales();
+  loadPayMethodSelect();
+
+  const filterSelect = document.getElementById('filterPayment');
+  filterSelect.addEventListener("change",filterSalesByPayment)
 });
 
 function loadSales() {
@@ -15,7 +26,6 @@ function loadSales() {
       return response.json();
     })
     .then((data) => {
-      console.log("Clientes", data);
       if (data.status === "ok") {
         allSales = data.data;
         displaySales(allSales);
@@ -31,6 +41,190 @@ function loadSales() {
         "<p>Error al cargar las ventas</p></td></tr>";
     });
 }
+
+async function loadPayMethodSelect() {
+  await fetch(API_URL_PAYMENT_METHOD)
+  .then((response)=>{
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    return response.json();
+  })
+  .then((data)=>{
+    const paymentSelect = document.getElementById("filterPayment");
+    
+    for (let i = 0; i < data.data.length; i++) {
+      const newOption = document.createElement("option");
+      newOption.value = data.data[i].payment_name;
+      newOption.text =  data.data[i].payment_name;
+      paymentSelect.appendChild(newOption);
+    }    
+    
+  }).catch((error)=>{
+    console.error("Error al cargar paymentSelect")
+  })
+}
+
+function filterSalesByPayment(){
+  const filterSelect = document.getElementById('filterPayment')
+  const selectedPayment = filterSelect.value;
+
+  const tableRow = document.querySelectorAll('table tbody tr');
+
+  tableRow.forEach(row =>{
+    const paymentCell = row.querySelector("td:nth-child(7)");
+    const paymentValue = paymentCell.textContent.trim();
+
+    if (selectedPayment === "" || paymentValue === selectedPayment){
+      row.style.display = "";
+    }else{
+      row.style.display = "none";
+    }
+  })
+
+}
+
+ function loadModalSelects() {
+  if (selectsLoaded) return; 
+  
+  fetch(API_URL_PAYMENT_METHOD)
+  .then((response)=>{
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    return response.json();
+   })
+   .then((data)=>{
+     const paymentSelect = document.getElementById("paymentSelect");
+  
+     for (let i = 0; i < data.data.length; i++) {
+       const newOption = document.createElement("option");
+       newOption.value = data.data[i].payment_name;
+       newOption.text =  data.data[i].payment_name;
+       paymentSelect.appendChild(newOption);
+     }    
+  
+   }).catch((error)=>{
+     console.error("Error al cargar paymentSelect")
+   })
+
+  fetch(API_URL_PRODUCTS)
+  .then((response)=>{
+    if (!response.ok)  throw new Error("Error en la respuesta del servidor");
+    return response.json();
+  })
+  .then((data)=>{
+    productsData = data.data;
+    const productSelect = document.getElementById("productSelect")
+
+    for (let i = 0; i < data.data.length; i++) {
+      const newOption = document.createElement("option");
+      newOption.value = data.data[i].product_id;
+      newOption.text = data.data[i].name;
+      newOption.dataset.price = data.data[i].unit_price;
+      newOption.dataset.name = data.data[i].name;
+      productSelect.appendChild(newOption);
+    }
+  })
+  .catch((error)=>{
+    console.error("Error al cargar productSelect")
+  })
+
+  selectsLoaded = true;
+}
+
+function updateUnitPrice(){
+  const productSelect = document.getElementById('productSelect');
+  const selectedOption = productSelect.options[productSelect.selectedIndex];
+  const unitPriceInput = document.getElementById('unitPriceInput');
+
+  if(selectedOption.value){
+    const price = parseFloat(selectedOption.dataset.price);
+    unitPriceInput.value = `$${price.toFixed(2)}`;
+  }else {
+    unitPriceInput.value = '';
+  }
+
+  calcularTotal();
+}
+
+function calcularTotal(){
+  const productSelect = document.getElementById('productSelect');
+  const selectedOption = productSelect.options[productSelect.selectedIndex];
+  const quantity = parseFloat(document.getElementById('quantityInput').value) || 0;
+  const totalPreview = document.getElementById('totalPreview');
+
+  if(selectedOption.value && quantity > 0){
+    const unitPrice = parseFloat(selectedOption.dataset.price);
+    const total = unitPrice * quantity;
+    totalPreview.textContent = `$${total.toFixed(2)}`;
+
+  }else{
+    totalPreview.textContent = "$0.00"
+  }
+}
+
+function addSale(){
+  const clientName = document.getElementById('clientName').value;
+  const productSelect = document.getElementById('productSelect');
+  const selectedProduct = productSelect.options[productSelect.selectedIndex];
+  const quantity = document.getElementById('quantityInput').value;
+  const paymentMethod = document.getElementById('paymentSelect').value;
+
+  if (!clientName || !productSelect.value || !quantity || !paymentMethod) {
+    alert('Porfavor completa todos los campos')
+    return;
+  }
+
+  const data = {
+    client_name: clientName,
+    product_id: productSelect.value,
+    productName: selectedProduct.dataset.name,
+    quantity: parseInt(quantity),
+    unit_price: parseFloat(selectedProduct.dataset.price),
+    payment_name: paymentMethod,
+  };
+
+  fetch(API_URL_ADD, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type" : "aplication/json"
+    }
+  })
+  .then((response)=>{
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    return response.json();
+  })
+  .then((responseData)=>{
+    console.log("Venta agregada exitosamente: ",responseData);
+    
+    loadSales();
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+    modal.hide();
+
+    document.getElementById('clientName').value = "";
+    document.getElementById('productSelect').value = "";
+    document.getElementById('quantityInput').value = "1";
+    document.getElementById('patmentSelect').value = "";
+    document.getElementById('unitPriceInput').value = "";
+    document.getElementById('totalPreview').textContent = "$0.00";
+
+    alert('Venta registrada correctamente!!');
+  })
+  .catch((error)=>{
+    console.error("Error al agregar un producto", error)
+  })
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  const productSelect = document.getElementById('productSelect');
+  const quantityInput = document.getElementById('quantityInput');
+
+  productSelect.addEventListener('change', updateUnitPrice);
+
+  quantityInput.addEventListener('input', calcularTotal);
+
+  const addModal = document.getElementById('addModal');
+  if(addModal) addModal.addEventListener('show.bs.modal',loadModalSelects);
+});
 
 function displaySales(sales) {
   const tbody = document.getElementById("salesTableBody");
@@ -178,7 +372,3 @@ function formatDate(dateString) {
   });
 }
 
-// Función para agregar venta (placeholder)
-function addSale() {
-  alert("Función de agregar venta - Conectar con tu API de inserción");
-}

@@ -4,6 +4,8 @@ const API_URL_GET =
 const API_URL_ADD =   "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_sale.php";
 const API_URL_PAYMENT_METHOD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_payment_methods.php";
 const API_URL_PRODUCTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_products.php";
+const API_URL_ADD_CLIENT = "";
+const API_URL_ZONES = "";
 
 
 let allSales = [];
@@ -83,7 +85,7 @@ function filterSalesByPayment(){
 
 }
 
- function loadModalSelects() {
+function loadModalSelects() {
   if (selectsLoaded) return; 
   
   fetch(API_URL_PAYMENT_METHOD)

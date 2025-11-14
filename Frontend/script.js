@@ -82,10 +82,10 @@ function filterSalesByPayment(){
 
 }
 
-async function loadModalSelects() {
+ function loadModalSelects() {
   if (selectsLoaded) return; 
   
-  await fetch(API_URL_PAYMENT_METHOD)
+  fetch(API_URL_PAYMENT_METHOD)
   .then((response)=>{
     if (!response.ok) throw new Error("Error en la respuesta del servidor");
     return response.json();
@@ -104,7 +104,7 @@ async function loadModalSelects() {
      console.error("Error al cargar paymentSelect")
    })
 
-  await fetch(API_URL_PRODUCTS)
+  fetch(API_URL_PRODUCTS)
   .then((response)=>{
     if (!response.ok)  throw new Error("Error en la respuesta del servidor");
     return response.json();
@@ -160,16 +160,26 @@ function calcularTotal(){
   }
 }
 
-async function LoadUnitPrice() {
-  
-}
-
-function addSale() {
-  const client = document.getElementById('clientName').value;
-  const product = document.getElementById('productSelect').value;
+function addSale(){
+  const clientName = document.getElementById('clientName').value;
+  const productSelect = document.getElementById('productSelect');
+  const selectedProduct = productSelect.options[productSelect.selectedIndex];
   const quantity = document.getElementById('quantityInput').value;
-  const unit_price = document.  
+  const paymentMethod = document.getElementById('paymentSelect').value;
 
+  if (!clientName || !productSelect.value || !quantity || !paymentMethod) {
+    alert('Porfavor completa todos los campos')
+    return;
+  }
+
+  const data = {
+    client_name: clientName,
+    product_id: productSelect.value,
+    productName: selectedProduct.dataset.name,
+    quantity: parseInt(quantity),
+    unit_price: parseFloat(selectedProduct.dataset.price),
+    payment_name: paymentMethod,
+  };
 
   fetch(API_URL_ADD, {
     method: "POST",
@@ -182,10 +192,39 @@ function addSale() {
     if (!response.ok) throw new Error("Error en la respuesta del servidor");
     return response.json();
   })
+  .then((responseData)=>{
+    console.log("Venta agregada exitosamente: ",responseData);
+    
+    loadSales();
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+    modal.hide();
+
+    document.getElementById('clientName').value = "";
+    document.getElementById('productSelect').value = "";
+    document.getElementById('quantityInput').value = "1";
+    document.getElementById('patmentSelect').value = "";
+    document.getElementById('unitPriceInput').value = "";
+    document.getElementById('totalPreview').textContent = "$0.00";
+
+    alert('Venta registrada correctamente!!');
+  })
   .catch((error)=>{
     console.error("Error al agregar un producto", error)
   })
 }
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  const productSelect = document.getElementById('productSelect');
+  const quantityInput = document.getElementById('quantityInput');
+
+  productSelect.addEventListener('change', updateUnitPrice);
+
+  quantityInput.addEventListener('input', calcularTotal);
+
+  const addModal = document.getElementById('addModal');
+  if(addModal) addModal.addEventListener('show.bs.modal',loadModalSelects);
+});
 
 function displaySales(sales) {
   const tbody = document.getElementById("salesTableBody");

@@ -14,6 +14,7 @@ let selectsLoaded = false;
 let productsData = [];
 let zones = [];
 const paymentMethodsData = {};
+const zonesData = {};
 document.addEventListener("DOMContentLoaded", () => {
   loadSales();
   loadPayMethodSelect();
@@ -136,13 +137,15 @@ function loadModalSelects() {
   })
   .then((data)=>{
   zones = data.data;
-  const zonesSelect = document.getElementById('zeneSelect');
+  const zonesSelect = document.getElementById('zoneSelect');
   
   for (let i = 0; i < zones.length; i++) {
     const newOption = document.createElement("option");      
     newOption.value = zones[i].zone_name;
     newOption.text = zones[i].zone_name;
-    zonesSelect.appendChild(newOption);    
+    zonesSelect.appendChild(newOption);
+    zonesData[data.data[i].zone_name] = data.data[i];      
+    
   }
 
   }).catch((error)=>{
@@ -151,6 +154,8 @@ function loadModalSelects() {
 
   selectsLoaded = true;
 }
+
+
 
 function updateUnitPrice(){
   const productSelect = document.getElementById('productSelect');
@@ -181,6 +186,54 @@ function calcularTotal(){
   }else{
     totalPreview.textContent = "$0.00"
   }
+}
+
+function addClient(){
+  const first_name = document.getElementById('firstName').value;
+  const last_name = document.getElementById('lastName').value;
+  const email = document.getElementById('email').value;
+  const age = document.getElementById('age').value;
+  const zoneSelect = document.getElementById('zoneSelect');
+  const selectedZone = zoneSelect.options[zoneSelect.selectedIndex];
+
+  if(!first_name|| !last_name|| !email|| !age|| !zoneSelect.value) {
+    alert('Porfavor completa los campos');
+    return;
+  }
+
+  const data = {
+    first_name: first_name,
+    last_name: last_name,
+    email: email,
+    age: age,
+    zone_id: zonesData[zones].zone_id,
+  }
+
+  fetch(API_URL_ADD_CLIENT, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type" : "application/json"
+    }
+  })
+  .then((response)=>{
+    if(!response.ok) throw new Error('Error en la respuesta del servidro')
+      return response.json();
+  })
+  .then((data)=>{
+    console.log("Cliente agregada exitosamente: ", data);
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addClientModal'));
+    modal.hide();
+
+    document.getElementById('firstName').value = "";
+    document.getElementById('lastname').value = "";
+    document.getElementById('email').value = "";
+    document.getElementById('age').value = "";
+    document.getElementById('zoneSelect').value = "";
+
+    alert('Cliente registrado/a correctamente!!');
+  })
 }
 
 function addSale(){

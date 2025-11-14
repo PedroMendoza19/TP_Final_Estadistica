@@ -4,14 +4,15 @@ const API_URL_GET =
 const API_URL_ADD =   "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_sale.php";
 const API_URL_PAYMENT_METHOD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_payment_methods.php";
 const API_URL_PRODUCTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_products.php";
-const API_URL_ADD_CLIENT = "";
-const API_URL_ZONES = "";
+const API_URL_ADD_CLIENT = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_client.php";
+const API_URL_ZONES = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_zones.php";
 
 
 let allSales = [];
 let barChart, doughnutChart;
 let selectsLoaded = false;
 let productsData = [];
+let zones = [];
 const paymentMethodsData = {};
 document.addEventListener("DOMContentLoaded", () => {
   loadSales();
@@ -93,19 +94,18 @@ function loadModalSelects() {
     if (!response.ok) throw new Error("Error en la respuesta del servidor");
     return response.json();
    })
-   .then((data)=>{
+  .then((data)=>{
      const paymentSelect = document.getElementById("paymentSelect");
   
-     for (let i = 0; i < data.data.length; i++) {
-       const newOption = document.createElement("option");
-       newOption.value = data.data[i].payment_name;
-       newOption.text =  data.data[i].payment_name;
-       paymentSelect.appendChild(newOption);
-     }    
-  
-   }).catch((error)=>{
-     console.error("Error al cargar paymentSelect")
-   })
+    for (let i = 0; i < data.data.length; i++) {
+      const newOption = document.createElement("option");
+      newOption.value = data.data[i].payment_name;
+      newOption.text =  data.data[i].payment_name;
+      paymentSelect.appendChild(newOption);
+    }    
+  }).catch((error)=>{
+    console.error("Error al cargar paymentSelect")
+  })
 
   fetch(API_URL_PRODUCTS)
   .then((response)=>{
@@ -116,17 +116,30 @@ function loadModalSelects() {
     productsData = data.data;
     const productSelect = document.getElementById("productSelect")
 
-    for (let i = 0; i < data.data.length; i++) {
+    for (let i = 0; i < productsData.length; i++) {
       const newOption = document.createElement("option");
-      newOption.value = data.data[i].product_id;
-      newOption.text = data.data[i].name;
-      newOption.dataset.price = data.data[i].unit_price;
-      newOption.dataset.name = data.data[i].name;
+      newOption.value = productsData[i].product_id;
+      newOption.text = productsData[i].name;
+      newOption.dataset.price = productsData[i].unit_price;
+      newOption.dataset.name = productsData[i].name;
       productSelect.appendChild(newOption);
     }
   })
   .catch((error)=>{
-    console.error("Error al cargar productSelect")
+    console.error("Error al cargar productSelect", error)
+  })
+
+  fetch(API_URL_ZONES)
+  .then((response)=> {
+    if(!response.ok) throw new Error("Error en la respuesta del servidor");
+    return;
+  })
+  .then((data)=>{
+    console.log(data);
+    
+
+  }).catch((error)=>{
+    console.error("Error al cargar zoneSelect", error)
   })
 
   selectsLoaded = true;
@@ -230,6 +243,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   if(addModal) addModal.addEventListener('show.bs.modal',loadModalSelects);
 });
 
+
 function displaySales(sales) {
   const tbody = document.getElementById("salesTableBody");
 
@@ -243,19 +257,19 @@ function displaySales(sales) {
     .map(
       (sale) => `
         <tr>
-                    <td><strong>#${sale.sale_id}</strong></td>
-                    <td>${formatDate(sale.sale_date)}</td>
-                    <td>${sale.first_name} ${sale.last_name}</td>
-                    <td>${sale.name}</td>
-                    <td>${sale.quantity}</td>
-                    <td>$${parseFloat(sale.unit_price).toFixed(2)}</td>
-                    <td><span class="badge badge-payment bg-info">${
-                      sale.payment_name
-                    }</span></td>
-                    <td class="text-end"><strong>$${parseFloat(
-                      sale.total
-                    ).toFixed(2)}</strong></td>
-                </tr>
+          <td><strong>#${sale.sale_id}</strong></td>
+          <td>${formatDate(sale.sale_date)}</td>
+          <td>${sale.first_name} ${sale.last_name}</td>
+          <td>${sale.name}</td>
+          <td>${sale.quantity}</td>
+          <td>$${parseFloat(sale.unit_price).toFixed(2)}</td>
+          <td><span class="badge badge-payment bg-info">${
+            sale.payment_name
+          }</span></td>
+          <td class="text-end"><strong>$${parseFloat(
+            sale.total
+          ).toFixed(2)}</strong></td>
+      </tr>
         `
     )
     .join("");

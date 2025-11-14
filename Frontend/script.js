@@ -132,11 +132,18 @@ function loadModalSelects() {
   fetch(API_URL_ZONES)
   .then((response)=> {
     if(!response.ok) throw new Error("Error en la respuesta del servidor");
-    return;
+    return response.json();
   })
   .then((data)=>{
-    console.log(data);
-    
+  zones = data.data;
+  const zonesSelect = document.getElementById('zeneSelect');
+  
+  for (let i = 0; i < zones.length; i++) {
+    const newOption = document.createElement("option");      
+    newOption.value = zones[i].zone_name;
+    newOption.text = zones[i].zone_name;
+    zonesSelect.appendChild(newOption);    
+  }
 
   }).catch((error)=>{
     console.error("Error al cargar zoneSelect", error)

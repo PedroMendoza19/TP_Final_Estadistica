@@ -68,7 +68,11 @@
             </div>
         </div>
 
-        
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal" onclick="loadModalSelects()">
+                Agregar cliente
+            </button>
+        </div>        
 
         <!-- Tabla de Ventas -->
         <div class="table-container">
@@ -172,6 +176,7 @@
                     <button type="button" class="btn btn-primary" onclick="addSale()">
                         <i class="fas fa-save me-2"></i>Guardar Venta
                     </button>
+                    
                 </div>
             </div>
         </div>
@@ -208,6 +213,12 @@
                     <option value="">Seleccione una zona...</option>
                 </select>
             </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="">
+                <i class="fas fa-save me-2"></i>Agregar Cliente
+            </button>
         </div>
     </div>
 </div>

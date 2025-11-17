@@ -152,6 +152,15 @@ function loadModalSelects() {
       console.error("Error al cargar zoneSelect", error)
     })
 
+  $(document).ready(function(){
+    $('#clientSelect').select2({
+      placeholder: "Seleccione un cliente",
+      allowClear: true,
+      width: '100%',
+      theme: 'bootstrap-5'
+    });
+  });
+
     fetch(API_URL_CLIENTS)
     .then((response)=>{
       if (!response.ok) throw new Error("Error en la respuesta del servidor");
@@ -161,14 +170,49 @@ function loadModalSelects() {
       let clients = data.data;
 
       const clientsSelect = document.getElementById('clientSelect');
-
+      
       clients.forEach((client)=>{
         const newOption = document.createElement('option');
-        newOption.value = client.first_name + ' ' + client.last_name;
+        newOption.value = client.id;
         newOption.text = client.first_name + ' ' + client.last_name;
+        newOption.setAttribute('data-firstname',client.first_name);
+        newOption.setAttribute('data-lastname',client.last_name);
         clientsSelect.appendChild(newOption);
-
+        
       })
+      
+      $('#clientSelect').select2({
+        placeholder: "Seleccione un cliente",
+        allowClear: true,
+        width: '100%',
+        theme: 'bootstrap-5',
+        dropdownParent: $('#addModal'),
+        tags: true,
+        createTag: function(params){
+          var term = $.trim(params.term);
+          if ( term === '') return null;
+          return{
+            id: 'new_' + term,
+            text: term + ' (Nuevo Cliente)',
+            newTag: true
+          }
+        }
+      });      
+
+      $('#clientSelect').on('select2:select', function (e) {
+        var data = e.params.data;
+
+        if(data.id.toString().startsWith('new_')){
+          mostrarFormularioNuevoCliente(data.text.replace(' (Nuevo Cliente)', ''))
+        }else{
+          ocultarFormularioNuevoCliente();
+        }
+      });
+
+      $('#clientSelect').on('select2:clear', function(e){
+        ocultarFormularioNuevoCliente();
+      })
+
     })
     .catch((error)=>{
       console.error("Error al cargar clientsSelect" ,error);
@@ -177,7 +221,25 @@ function loadModalSelects() {
   selectsLoaded = true;
 }
 
+function mostrarFormularioNuevoCliente(nombreCompleto){
+  const names = nombreCompleto.split(' ');
+  const firstName =  names[0] || '';
+  const lastName = names.slice(1).join(' ') || '';
 
+  $('#newClientContainer').slideDown();
+
+  $('#newClientName').val(firstName);
+  $('#newClientLastName').val(lastName);
+}
+
+function ocultarFormularioNuevoCliente(){
+  $('#newClientContainer').slideUp();
+  $('#newClientName').val('');
+  $('#newClientLastName').val('');
+  $('#newClientEmail').val('');
+  $('#newClientAge').val('');
+  $('#zoneSelect').val('');
+}
 
 function updateUnitPrice() {
   const productSelect = document.getElementById('productSelect');
@@ -228,8 +290,6 @@ function addClient() {
     }
   });
 
-
-
   const data = {
     first_name: first_name,
     last_name: last_name,
@@ -237,7 +297,6 @@ function addClient() {
     age: age,
     zone_id: zoneSelectedid
   }
-
 
   fetch(API_URL_ADD_CLIENT, {
     method: "POST",
@@ -274,8 +333,75 @@ function addClient() {
 
 }
 
+  
 function addSale() {
-  const clientName = document.getElementById('clientName').value;
+  const clienteSeleccionado = $('#clientSelect').val();
+  
+  if (clienteSeleccionado && clienteSeleccionado.startsWith('new_')) {
+    addNewClientAndSale();
+  } else {
+    procesarVenta(clienteSeleccionado);
+  }
+}
+
+function addNewClientAndSale() {
+  const first_name = document.getElementById('newClientName').value;
+  const last_name = document.getElementById('newClientLastName').value;
+  const email = document.getElementById('newClientEmail').value;
+  const age = document.getElementById('newClientAge').value;
+  const zoneSelect = document.getElementById('zoneSelect').value;
+
+  if (!first_name || !last_name || !email || !age || !zoneSelect) {
+    alert('Por favor completa todos los campos del cliente');
+    return;
+  }
+
+  let zoneSelectedid;
+  zonesData.forEach((zone) => {
+    if (zone.zone_id == zoneSelect) {
+      zoneSelectedid = zone.zone_id;
+    }
+  });
+
+  const data = {
+    first_name: first_name,
+    last_name: last_name,
+    email: email,
+    age: age,
+    zone_id: zoneSelectedid
+  };
+
+  fetch(API_URL_ADD_CLIENT, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  .then((response) => {
+    if (!response.ok) {
+      if (response.status === 409) {
+        alert('El email ya está registrado. Por favor, utiliza otro email.');
+        throw new Error('Email duplicado');
+      }
+      throw new Error('Error al crear cliente');
+    }
+    return response.json();
+  })
+  .then((clienteCreado) => {
+    console.log("Cliente agregado exitosamente: ", clienteCreado);
+    
+    procesarVenta(clienteCreado.id);
+    
+    ocultarFormularioNuevoCliente();
+  })
+  .catch((error) => {
+    console.error("Error al agregar cliente:", error);
+  });
+}
+
+function procesarVenta(clienteId) {
+  const clientName = document.getElementById('clientSelect').value;
   const productSelect = document.getElementById('productSelect');
   const selectedProduct = productSelect.options[productSelect.selectedIndex];
   const quantity = document.getElementById('quantityInput').value;
@@ -330,9 +456,11 @@ function addSale() {
           });
       }
     })
-
+  
+  
+  console.log('Procesando venta para cliente:', clienteId);
 }
-
+ 
 document.addEventListener("DOMContentLoaded", () => {
   const productSelect = document.getElementById('productSelect');
   const quantityInput = document.getElementById('quantityInput');

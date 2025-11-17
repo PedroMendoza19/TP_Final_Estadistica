@@ -6,6 +6,7 @@ const API_URL_PAYMENT_METHOD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get
 const API_URL_PRODUCTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_products.php";
 const API_URL_ADD_CLIENT = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_client.php";
 const API_URL_ZONES = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_zones.php";
+const API_URL_CLIENTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_clients.php";
 
 
 let allSales = [];
@@ -149,6 +150,28 @@ function loadModalSelects() {
 
     }).catch((error) => {
       console.error("Error al cargar zoneSelect", error)
+    })
+
+    fetch(API_URL_CLIENTS)
+    .then((response)=>{
+      if (!response.ok) throw new Error("Error en la respuesta del servidor");
+      return response.json();
+    })
+    .then((data)=>{
+      let clients = data.data;
+
+      const clientsSelect = document.getElementById('clientSelect');
+
+      clients.forEach((client)=>{
+        const newOption = document.createElement('option');
+        newOption.value = client.first_name + ' ' + client.last_name;
+        newOption.text = client.first_name + ' ' + client.last_name;
+        clientsSelect.appendChild(newOption);
+
+      })
+    })
+    .catch((error)=>{
+      console.error("Error al cargar clientsSelect" ,error);
     })
 
   selectsLoaded = true;

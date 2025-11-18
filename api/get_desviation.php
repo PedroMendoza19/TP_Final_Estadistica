@@ -5,6 +5,7 @@ require_once 'conn.php';
 header("Access-Control-Allow-Methods: POST");
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -24,7 +25,7 @@ foreach ($requiredFields as $field) {
         http_response_code(400);
         echo json_encode([
             "status" => "error",
-            "message" => "Missing required field: $field"
+            "message" => "Falta el campo requerido: $field"
         ]);
         exit(); 
     }
@@ -34,7 +35,7 @@ if ($request['origin_date'] == $request['end_date']) {
     http_response_code(400);
     echo json_encode([
         "status" => "error",
-        "message" => "Origin date and end date cannot be the same"
+        "message" => "La fecha de origen y la fecha final no pueden ser iguales"
     ]);
     exit();
     
@@ -68,7 +69,7 @@ if (count($sales) === 1) {
     http_response_code(400); 
     echo json_encode([
         "status" => "error",
-        "message" => "Only one sale on that period, standard deviation cannot be calculated"
+        "message" => "Numero de ventas insuficiente para calcular la desviacion"
     ]);
     exit();
 }

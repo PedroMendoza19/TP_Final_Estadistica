@@ -7,7 +7,7 @@ const API_URL_PRODUCTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_produ
 const API_URL_ADD_CLIENT = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_client.php";
 const API_URL_ZONES = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_zones.php";
 const API_URL_CLIENTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_clients.php";
-const API_URL_STADISTICS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_statistics.php"
+const API_URL_STATISTICS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_statistics.php"
 const API_URL_CORRELATIONS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_correlations.php"
 const API_URL_DESVIATION = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_desviation.php"
 
@@ -25,11 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPayMethodSelect();
   loadStatistics();
   loadCorrelations();
-  loadDesviation();
-  setupAverageSelector();
 
   const filterSelect = document.getElementById('filterPayment');
-  filterSelect.addEventListener("change", filterSalesByPayment)
+  if (filterSelect) filterSelect.addEventListener("change", filterSalesByPayment);
 });
 
 function loadSales() {
@@ -96,11 +94,26 @@ function filterSalesByPayment() {
 }
 
 function loadStatistics() {
-  fetch(API_URL_STADISTICS)
-  .then(response => response.json())
+  console.log("Cargando estadisticas de :",API_URL_STATISTICS);
+  fetch(API_URL_STATISTICS)
+  .then(response =>{
+    console.log('Respuesta recibida, status: ',response.status);
+    
+    if (!response.ok) throw new Error("Error en la respuesta del servidor" + response.status);
+    response.json();
+  })
   .then(data =>{
-    if (data.status === 'ok') {
+    console.log('Datos COMPLETOS de estadisticas recibidas: ',JSON.stringify(data, null, 2));
+    console.log('Status: ',data.status);
+    console.log('Data: ', data.data);
+        
+    if (data.data.status === 'ok' && data.data) {
       statisticsData = data.data;
+
+      console.log('statisticsData asignado: ',statisticsData);
+      console.log('Keys de statisticsData: ',Object.keys(statisticsData));
+      
+      setupAverageSelector();
       displayAverageChart('day')
     }
   })
@@ -109,17 +122,30 @@ function loadStatistics() {
   })
 }
 
-async function setupAverageSelector(){
+function setupAverageSelector(){
   const selector = document.getElementById('averageTypeSelect');
   if(selector){
-    selector.addEventListener('change',function(){
-      displayAverageChart(this.value);
-    });
+    console.log('Selector encontrado, añadiendo event Listener');
+    selector.removeEventListener('change', handleAverageChange)
+    selector.addEventListener('change',handleAverageChange);
+  }else{
+    console.error('No se encontro el selector averageTypeSelector')
   }
 }
 
+function handleAverageChange(e){
+  console.log('Cambio detectado', e.target.value);
+  displayAverageChart(e.target.value);
+}
+
 function displayAverageChart(type) {
-  if(!statisticsData) return;
+console.log('Mostrando graficos de tipo', type);
+
+
+  if(!statisticsData) {
+    console.error('No hay datos de estadisticas disponibles')
+    return;
+  }
 
   let data, labels, title;
 
@@ -139,14 +165,28 @@ function displayAverageChart(type) {
       labels = Object.keys(data);
       title = 'Promedio de Ventas por cliente';
       break;
+    default:
+      console.error('Tipo de grafico no valido: ', type);
+      return;
+  }
+
+  if(!data || Object.keys(data).length === 0){
+    console.error('No hay datos para mostrar en el grafico');
+    return;
   }
   
   const values = Object.values(data);
+  console.log('Datos del grafico: ',{labels, values});
 
   if(averageChart) averageChart.destroy();
 
-  const ctx = document.getElementById('averageChart').getContext('2d');
-  averageChart = new Chart(ctx,{
+  const ctx = document.getElementById('averageChart');
+  if (!ctx){
+    console.error('No se encontro averageChart');
+    return;
+  }
+
+  averageChart = new Chart(ctx.getContext('2d'),{
     type: 'bar',
     data: {
          labels: labels,
@@ -299,6 +339,8 @@ function calculateDeviation() {
   const startDate = document.getElementById('startDate').value;
   const endDate = document.getElementById('endDate').value;
 
+  console.log(startDate);
+  
   if (!startDate || !endDate) {
     alert('Por favor selecciona ambas fechas');
     return;
@@ -314,7 +356,7 @@ function calculateDeviation() {
     end_date: endDate
   };
 
-  fetch(API_URL_DEVIATION, {
+  fetch(API_URL_DESVIATION, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

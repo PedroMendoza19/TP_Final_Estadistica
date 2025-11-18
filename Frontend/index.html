@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
 </head>
 
 <body>
@@ -136,20 +137,20 @@
                 <div class="col-lg-8">
                     <div class="chart-container">
                         <h5 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Venta por Producto</h5>
-                        <canvas id="myChart"></canvas>
+                        <canvas id="myChart" class="m-3"></canvas>
                     </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="chart-container">
                         <h5 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Métodos de Pago</h5>
-                        <canvas class="p-4" id="doughnut"></canvas>
+                        <canvas class="m-3" id="doughnut"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Segunda fila: Promedios -->
+            <!-- Segunda fila: Promedios y Desviacion -->
             <div class="row g-4 mb-4">
-                <div class="col-12">
+                <div class="col-6">
                     <div class="chart-container">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Análisis Estadístico</h5>
@@ -162,43 +163,32 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-center">
-                            <div style="height: 390px; position: relative;">
-                                <canvas id="averageChart"></canvas>
-                            </div>
+                        <div class="d-flex justify-content-center" style="height: 300px;">
+                            <canvas id="averageChart"></canvas>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tercera fila: Correlaciones y Desviación -->
-            <div class="row g-4 mb-4">
-                <!-- Correlaciones -->
-                <div class="col-lg-6">
-                    <div class="chart-container">
-                        <h5 class="mb-3"><i class="fas fa-project-diagram me-2"></i>Correlaciones de Pearson</h5>
-                        <canvas id="correlationChart"></canvas>
-                    </div>
-                </div>
-                
                 <!-- Desviación Estándar -->
                 <div class="col-lg-6">
                     <div class="chart-container">
                         <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Desviación Estándar</h5>
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">Fecha Inicio:</label>
                                 <input type="date" id="startDate" class="form-control">
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">Fecha Fin:</label>
                                 <input type="date" id="endDate" class="form-control">
                             </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-primary mb-3" onclick="calculateDeviation()">
+                                    <i class="fas fa-calculator me-2"></i>Calcular Desviación
+                                </button>
+                            </div>
                         </div>
-                        <button class="btn btn-primary mb-3" onclick="calculateDeviation()">
-                            <i class="fas fa-calculator me-2"></i>Calcular Desviación
-                        </button>
-                        <div id="deviationResult" class="alert alert-info" style="display: none;">
+                        <div id="deviationResult" class="alert alert-info">
                             <h6 class="mb-2">Resultados:</h6>
                             <p class="mb-1"><strong>Desviación Estándar:</strong> <span id="deviationValue">-</span></p>
                             <p class="mb-0"><small class="text-muted">Período: <span id="deviationPeriod">-</span></small></p>
@@ -207,38 +197,68 @@
                 </div>
             </div>
 
-            <!-- Cuarta fila: Tarjetas de interpretación -->
+
+            <!-- Tercera fila: Correlaciones y Tarjetas -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-12">
+                    <!-- Correlaciones -->
+                    <div class="chart-container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="mb-3"><i class="fas fa-project-diagram me-2"></i>Correlaciones de Pearson
+                                </h5>
+                                <canvas id="correlationChart"></canvas>
+                            </div>
+
+                            <!-- Tarjetas de interpretación -->
+                            <div class="col-md-6">
+                                <div class="row g-4 mb-3">
+                                    <div class="col-12">
+                                        <div class="card border-primary">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-primary">
+                                                    <i class="fas fa-info-circle me-2"></i>Correlación Precio vs
+                                                    Cantidad
+                                                </h6>
+                                                <p class="card-text" id="corrPriceQuantityText">Cargando...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-4 mb-3">
+                                    <div class="col-12">
+
+                                        <div class="card border-success">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-success">
+                                                    <i class="fas fa-info-circle me-2"></i>Correlación Cantidad vs Día
+                                                </h6>
+                                                <p class="card-text" id="corrQuantityDayText">Cargando...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-4 mb-3">
+                                    <div class="col-12 ">
+                                        <div class="card border-warning">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-warning">
+                                                    <i class="fas fa-info-circle me-2"></i>Correlación Total vs Pago
+                                                </h6>
+                                                <p class="card-text" id="corrTotalPaymentText">Cargando...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card border-primary">
-                        <div class="card-body">
-                            <h6 class="card-title text-primary">
-                                <i class="fas fa-info-circle me-2"></i>Correlación Precio vs Cantidad
-                            </h6>
-                            <p class="card-text" id="corrPriceQuantityText">Cargando...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-success">
-                        <div class="card-body">
-                            <h6 class="card-title text-success">
-                                <i class="fas fa-info-circle me-2"></i>Correlación Cantidad vs Día
-                            </h6>
-                            <p class="card-text" id="corrQuantityDayText">Cargando...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-warning">
-                        <div class="card-body">
-                            <h6 class="card-title text-warning">
-                                <i class="fas fa-info-circle me-2"></i>Correlación Total vs Pago
-                            </h6>
-                            <p class="card-text" id="corrTotalPaymentText">Cargando...</p>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
@@ -262,7 +282,7 @@
                     <!-- Nuevo cliente -->
                     <div id="newClientContainer" style="display: none;" class="border rounded p-3 mb-3 bg-light">
                         <h6 class="mb-3"><i class="fas fa-user-plus me-2"></i>Datos del nuevo cliente</h6>
-                        
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nombre *</label>
@@ -273,7 +293,7 @@
                                 <input type="text" id="newClientLastName" class="form-control" required>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Email</label>
@@ -337,7 +357,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
-        
+
     <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

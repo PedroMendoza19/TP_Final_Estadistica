@@ -168,12 +168,11 @@ function loadModalSelects() {
     })
     .then((data)=>{
       let clients = data.data;
-
       const clientsSelect = document.getElementById('clientSelect');
       
       clients.forEach((client)=>{
         const newOption = document.createElement('option');
-        newOption.value = client.id;
+        newOption.value = client.client_id;
         newOption.text = client.first_name + ' ' + client.last_name;
         newOption.setAttribute('data-firstname',client.first_name);
         newOption.setAttribute('data-lastname',client.last_name);
@@ -401,19 +400,19 @@ function addNewClientAndSale() {
 }
 
 function procesarVenta(clienteId) {
-  const clientName = document.getElementById('clientSelect').value;
+  const clientId = document.getElementById('clientSelect').value;;
   const productSelect = document.getElementById('productSelect');
   const selectedProduct = productSelect.options[productSelect.selectedIndex];
   const quantity = document.getElementById('quantityInput').value;
   const paymentMethod = document.getElementById('paymentSelect').value;
 
-  if (!clientName || !productSelect.value || !quantity || !paymentMethod) {
+  if (!clientId || !productSelect.value || !quantity || !paymentMethod) {
     alert('Porfavor completa todos los campos')
     return;
   }
-
+  
   const data = {
-    client_name: clientName,
+    client_id: clientId,
     product_id: productSelect.value,
     productName: selectedProduct.dataset.name,
     sale_quantity: parseInt(quantity),
@@ -442,7 +441,7 @@ function procesarVenta(clienteId) {
           const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
           modal.hide();
 
-          document.getElementById('clientName').value = "";
+          document.getElementById('clientSelect').value = "";
           document.getElementById('productSelect').value = "";
           document.getElementById('quantityInput').value = "1";
           document.getElementById('paymentSelect').value = "";

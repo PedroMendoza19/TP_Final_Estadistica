@@ -168,7 +168,6 @@ function loadModalSelects() {
     })
     .then((data)=>{
       let clients = data.data;
-
       const clientsSelect = document.getElementById('clientSelect');
       
       clients.forEach((client)=>{
@@ -402,20 +401,19 @@ function addNewClientAndSale() {
 
 function procesarVenta(clienteId) {
   
-  const clientName = document.getElementById('clientSelect').value;
+  const clientId = document.getElementById('clientSelect').value;;
   const productSelect = document.getElementById('productSelect');
   const selectedProduct = productSelect.options[productSelect.selectedIndex];
   const quantity = document.getElementById('quantityInput').value;
   const paymentMethod = document.getElementById('paymentSelect').value;
-  
-  if (!clientName || !productSelect.value || !quantity || !paymentMethod) {
+
+  if (!clientId || !productSelect.value || !quantity || !paymentMethod) {
     alert('Porfavor completa todos los campos')
     return;
   }
-
-
+  
   const data = {
-    client_name: clientName,
+    client_id: clientId,
     product_id: productSelect.value,
     productName: selectedProduct.dataset.name,
     sale_quantity: parseInt(quantity),

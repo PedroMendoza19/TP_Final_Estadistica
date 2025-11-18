@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 $products = [];
 
-$sql = "select p.product_id,p.name,c.category_name,p.unit_price,p.stock,p.description from products as p inner join categories as c on p.category_id = c.category_id;";
+$sql = "select p.product_id,p.name,c.category_name,p.unit_price,p.stock,p.description from products as p inner join categories as c on p.category_id = c.category_id WHERE p.stock > 0;";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {

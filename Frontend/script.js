@@ -60,7 +60,6 @@ async function loadPayMethodSelect() {
         newOption.value = data.data[i].payment_name;
         newOption.text = data.data[i].payment_name;
         paymentSelect.appendChild(newOption);
-        paymentMethodsData[data.data[i].payment_name] = data.data[i];
       }
 
     }).catch((error) => {
@@ -103,6 +102,7 @@ function loadModalSelects() {
         newOption.value = data.data[i].payment_name;
         newOption.text = data.data[i].payment_name;
         paymentSelect.appendChild(newOption);
+        paymentMethodsData[i].payment_name = paymentSelect.payment_name;
       }
     }).catch((error) => {
       console.error("Error al cargar paymentSelect")
@@ -173,7 +173,7 @@ function loadModalSelects() {
       
       clients.forEach((client)=>{
         const newOption = document.createElement('option');
-        newOption.value = client.id;
+        newOption.value = client.client_id;
         newOption.text = client.first_name + ' ' + client.last_name;
         newOption.setAttribute('data-firstname',client.first_name);
         newOption.setAttribute('data-lastname',client.last_name);
@@ -401,16 +401,18 @@ function addNewClientAndSale() {
 }
 
 function procesarVenta(clienteId) {
+  
   const clientName = document.getElementById('clientSelect').value;
   const productSelect = document.getElementById('productSelect');
   const selectedProduct = productSelect.options[productSelect.selectedIndex];
   const quantity = document.getElementById('quantityInput').value;
   const paymentMethod = document.getElementById('paymentSelect').value;
-
+  
   if (!clientName || !productSelect.value || !quantity || !paymentMethod) {
     alert('Porfavor completa todos los campos')
     return;
   }
+
 
   const data = {
     client_name: clientName,
@@ -442,7 +444,7 @@ function procesarVenta(clienteId) {
           const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
           modal.hide();
 
-          document.getElementById('clientName').value = "";
+          document.getElementById('clientSelect').value = "";
           document.getElementById('productSelect').value = "";
           document.getElementById('quantityInput').value = "1";
           document.getElementById('paymentSelect').value = "";
@@ -619,3 +621,16 @@ function formatDate(dateString) {
   });
 }
 
+function switchTab(tabId, button) {
+    document.querySelectorAll('.tab-content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    document.querySelectorAll('.google-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    document.getElementById(tabId).classList.add('active');
+    
+    button.classList.add('active');
+}

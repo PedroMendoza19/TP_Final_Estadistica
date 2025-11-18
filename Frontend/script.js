@@ -14,7 +14,6 @@ let barChart, doughnutChart;
 let selectsLoaded = false;
 let productsData = [];
 let zonesData = [];
-const paymentMethodsData = {};
 document.addEventListener("DOMContentLoaded", () => {
   loadSales();
   loadPayMethodSelect();
@@ -99,13 +98,12 @@ function loadModalSelects() {
 
       for (let i = 0; i < data.data.length; i++) {
         const newOption = document.createElement("option");
-        newOption.value = data.data[i].payment_name;
+        newOption.value = data.data[i].payment_id;
         newOption.text = data.data[i].payment_name;
         paymentSelect.appendChild(newOption);
-        paymentMethodsData[i].payment_name = paymentSelect.payment_name;
       }
     }).catch((error) => {
-      console.error("Error al cargar paymentSelect")
+      console.error("Error al cargar paymentSelect",error)
     })
 
   fetch(API_URL_PRODUCTS)
@@ -406,7 +404,6 @@ function procesarVenta(clienteId) {
   const selectedProduct = productSelect.options[productSelect.selectedIndex];
   const quantity = document.getElementById('quantityInput').value;
   const paymentMethod = document.getElementById('paymentSelect').value;
-
   if (!clientId || !productSelect.value || !quantity || !paymentMethod) {
     alert('Porfavor completa todos los campos')
     return;
@@ -418,9 +415,10 @@ function procesarVenta(clienteId) {
     productName: selectedProduct.dataset.name,
     sale_quantity: parseInt(quantity),
     unit_price: parseFloat(selectedProduct.dataset.price),
-    payment_id: paymentMethodsData[paymentMethod].payment_id,
+    payment_id: paymentMethod,
   };
-
+  console.log(data);
+  
   fetch(API_URL_ADD, {
     method: "POST",
     body: JSON.stringify(data),

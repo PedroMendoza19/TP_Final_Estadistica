@@ -19,7 +19,6 @@ $input = file_get_contents('php://input');
 $request = json_decode($input, true);
 $requiredFields = ['origin_date', 'end_date'];
 
-// CORRECCIÓN 3: Añadir exit() si falta un campo
 foreach ($requiredFields as $field) {
     if (empty($request[$field])) {
         http_response_code(400);
@@ -27,7 +26,7 @@ foreach ($requiredFields as $field) {
             "status" => "error",
             "message" => "Missing required field: $field"
         ]);
-        exit(); // <-- AÑADIDO
+        exit(); 
     }
 }
 
@@ -41,7 +40,6 @@ if ($request['origin_date'] == $request['end_date']) {
     
 }
 
-// CORRECCIÓN 2: Usar Consultas Preparadas
 $sql = "SELECT s.sale_id, s.sale_date, s.total
         FROM sales s
         WHERE s.sale_date >= ? AND s.sale_date < ?";
@@ -67,7 +65,7 @@ while ($row = $result->fetch_assoc()) {
 }
 
 if (count($sales) === 1) {
-    http_response_code(400); // Devolver un error si solo hay 1 venta
+    http_response_code(400); 
     echo json_encode([
         "status" => "error",
         "message" => "Only one sale on that period, standard deviation cannot be calculated"
@@ -87,8 +85,7 @@ foreach ($sales as $sale) {
     $sqrSum += pow($sale['total'] - $average, 2);
 }
 
-// CORRECCIÓN 1: Usar Desviación Muestral (N - 1)
-$desviation = sqrt($sqrSum / (count($sales) - 1)); // <-- CORREGIDO
+$desviation = sqrt($sqrSum / (count($sales) - 1)); 
 
 echo json_encode([
     'status' => 'success',

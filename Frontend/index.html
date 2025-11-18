@@ -75,17 +75,17 @@
         <!-- NAVBAR DE NAVEGACIÓN ESTILO GOOGLE -->
         <nav class="mb-4">
             <div class="google-tabs">
-                <button class="google-tab" onclick="switchTab('ventas', this)">
+                <button class="google-tab active" onclick="switchTab('ventas', this)">
                     <i class="fas fa-table me-2"></i>Registro de Ventas
                 </button>
-                <button class="google-tab active" onclick="switchTab('estadisticas', this)">
+                <button class="google-tab" onclick="switchTab('estadisticas', this)">
                     <i class="fas fa-chart-pie me-2"></i>Estadísticas
                 </button>
             </div>
         </nav>
 
         <!-- PESTAÑA REGISTRO DE VENTAS -->
-        <div id="ventas" class="tab-content-section">
+        <div id="ventas" class="tab-content-section active">
             <div class="table-container">
                 <h4 class="mb-3"><i class="fas fa-table me-2"></i>Registro de Ventas</h4>
                 <div class="mb-4">
@@ -131,7 +131,7 @@
         </div>
 
         <!-- PESTAÑA ESTADÍSTICAS -->
-        <div id="estadisticas" class="tab-content-section active">
+        <div id="estadisticas" class="tab-content-section">
             <!-- Primera fila: Gráficos originales -->
             <div class="row g-4 mb-4">
                 <div class="col-lg-8">

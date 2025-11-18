@@ -94,55 +94,51 @@ function filterSalesByPayment() {
 }
 
 function loadStatistics() {
-  console.log("Cargando estadisticas de :",API_URL_STATISTICS);
+  ("Cargando estadisticas de :", API_URL_STATISTICS);
   fetch(API_URL_STATISTICS)
-  .then(response =>{
-    console.log('Respuesta recibida, status: ',response.status);
-    
-    if (!response.ok) throw new Error("Error en la respuesta del servidor" + response.status);
-    response.json();
-  })
-  .then(data =>{
-    console.log('Datos COMPLETOS de estadisticas recibidas: ',JSON.stringify(data, null, 2));
-    console.log('Status: ',data.status);
-    console.log('Data: ', data.data);
-        
-    if (data.data.status === 'ok' && data.data) {
-      statisticsData = data.data;
+    .then(response => {
+      ('Respuesta recibida, status: ', response.status);
 
-      console.log('statisticsData asignado: ',statisticsData);
-      console.log('Keys de statisticsData: ',Object.keys(statisticsData));
-      
-      setupAverageSelector();
-      displayAverageChart('day')
-    }
-  })
-  .catch(error=>{
-    console.error('Error al cargar el grafico', error)
-  })
+      if (!response.ok) throw new Error("Error en la respuesta del servidor" + response.status);
+      response.json().then(data => {
+        ('Datos COMPLETOS de estadisticas recibidas: ', JSON.stringify(data, null, 2));
+        ('Status: ', data.status);
+        ('Data: ', data.data);
+
+        if (data.status === 'ok' && data.data) {
+          statisticsData = data.data;
+
+          setupAverageSelector();
+          displayAverageChart('day');
+        }
+      });
+    })
+
+    .catch(error => {
+      console.error('Error al cargar el grafico', error)
+    })
 }
 
-function setupAverageSelector(){
+function setupAverageSelector() {
   const selector = document.getElementById('averageTypeSelect');
-  if(selector){
-    console.log('Selector encontrado, añadiendo event Listener');
+  if (selector) {
+    ('Selector encontrado, añadiendo event Listener');
     selector.removeEventListener('change', handleAverageChange)
-    selector.addEventListener('change',handleAverageChange);
-  }else{
+    selector.addEventListener('change', handleAverageChange);
+  } else {
     console.error('No se encontro el selector averageTypeSelector')
   }
 }
 
-function handleAverageChange(e){
-  console.log('Cambio detectado', e.target.value);
+function handleAverageChange(e) {
+  ('Cambio detectado', e.target.value);
   displayAverageChart(e.target.value);
 }
 
 function displayAverageChart(type) {
-console.log('Mostrando graficos de tipo', type);
+  ('Mostrando graficos de tipo', type);
 
-
-  if(!statisticsData) {
+  if (!statisticsData) {
     console.error('No hay datos de estadisticas disponibles')
     return;
   }
@@ -170,34 +166,34 @@ console.log('Mostrando graficos de tipo', type);
       return;
   }
 
-  if(!data || Object.keys(data).length === 0){
+  if (!data || Object.keys(data).length === 0) {
     console.error('No hay datos para mostrar en el grafico');
     return;
   }
-  
-  const values = Object.values(data);
-  console.log('Datos del grafico: ',{labels, values});
 
-  if(averageChart) averageChart.destroy();
+  const values = Object.values(data);
+  ('Datos del grafico: ', { labels, values });
+
+  if (averageChart) averageChart.destroy();
 
   const ctx = document.getElementById('averageChart');
-  if (!ctx){
+  if (!ctx) {
     console.error('No se encontro averageChart');
     return;
   }
 
-  averageChart = new Chart(ctx.getContext('2d'),{
+  averageChart = new Chart(ctx.getContext('2d'), {
     type: 'bar',
     data: {
-         labels: labels,
-         datasets: [{
-             label: 'Promedio ($)',
-             data: values,
-             backgroundColor: 'rgba(54, 162, 235, 0.6)',
-             borderColor: 'rgba(54, 162, 235, 1)',
-             borderWidth: 2
-         }]
-     },
+      labels: labels,
+      datasets: [{
+        label: 'Promedio ($)',
+        data: values,
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 2
+      }]
+    },
     options: {
       responsive: true,
       maintainAspectRatio: true,
@@ -209,13 +205,13 @@ console.log('Mostrando graficos de tipo', type);
         },
         legend: {
           display: false
-       }
+        }
       },
       scales: {
         y: {
           beginAtZero: true,
           ticks: {
-            callback: function(value) {
+            callback: function (value) {
               return '$' + value.toFixed(2);
             }
           }
@@ -227,21 +223,21 @@ console.log('Mostrando graficos de tipo', type);
 
 function loadCorrelations() {
   fetch(API_URL_CORRELATIONS)
-  .then(response => response.json())
-  .then(data => {
-    if (data.status === 'success') {
-      displayCorrelationChart(data.correlations);
-      displayCorrelationInterpretations(data.correlations);
-    }
-  })
-  .catch(error => {
-    console.error('Error al cargar correlaciones:', error);
-  });
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        displayCorrelationChart(data.correlations);
+        displayCorrelationInterpretations(data.correlations);
+      }
+    })
+    .catch(error => {
+      console.error('Error al cargar correlaciones:', error);
+    });
 }
 
 function displayCorrelationChart(correlations) {
   const ctx = document.getElementById('correlationChart').getContext('2d');
-  
+
   if (correlationChart) {
     correlationChart.destroy();
   }
@@ -259,11 +255,11 @@ function displayCorrelationChart(correlations) {
   ];
 
   const backgroundColors = values.map(val => {
-    if (val > 0.7) return 'rgba(75, 192, 192, 0.6)';  
-    if (val > 0.3) return 'rgba(54, 162, 235, 0.6)';  
-    if (val > -0.3) return 'rgba(255, 206, 86, 0.6)'; 
-    if (val > -0.7) return 'rgba(255, 159, 64, 0.6)'; 
-    return 'rgba(255, 99, 132, 0.6)'; 
+    if (val > 0.7) return 'rgba(75, 192, 192, 0.6)';
+    if (val > 0.3) return 'rgba(54, 162, 235, 0.6)';
+    if (val > -0.3) return 'rgba(255, 206, 86, 0.6)';
+    if (val > -0.7) return 'rgba(255, 159, 64, 0.6)';
+    return 'rgba(255, 99, 132, 0.6)';
   });
 
   correlationChart = new Chart(ctx, {
@@ -303,34 +299,34 @@ function displayCorrelationChart(correlations) {
 
 function displayCorrelationInterpretations(correlations) {
   const interpretations = {
-    price_vs_quantity: interpretCorrelation(correlations.price_vs_quantity, 
-    'A mayor precio', 'menor cantidad', 'mayor cantidad'),
+    price_vs_quantity: interpretCorrelation(correlations.price_vs_quantity,
+      'A mayor precio', 'menor cantidad', 'mayor cantidad'),
     quantity_vs_day_of_week: interpretCorrelation(correlations.quantity_vs_day_of_week,
-    'El día de la semana', 'no influye significativamente en', 'influye en'),
+      'El día de la semana', 'no influye significativamente en', 'influye en'),
     total_vs_payment_method: interpretCorrelation(correlations.total_vs_payment_method,
-    'El método de pago', 'no se relaciona con', 'se relaciona con')
+      'El método de pago', 'no se relaciona con', 'se relaciona con')
   };
 
-  document.getElementById('corrPriceQuantityText').innerHTML = 
+  document.getElementById('corrPriceQuantityText').innerHTML =
     `<strong>r = ${correlations.price_vs_quantity.toFixed(3)}</strong><br>${interpretations.price_vs_quantity}`;
-   
-  document.getElementById('corrQuantityDayText').innerHTML = 
+
+  document.getElementById('corrQuantityDayText').innerHTML =
     `<strong>r = ${correlations.quantity_vs_day_of_week.toFixed(3)}</strong><br>${interpretations.quantity_vs_day_of_week}`;
- 
-  document.getElementById('corrTotalPaymentText').innerHTML = 
+
+  document.getElementById('corrTotalPaymentText').innerHTML =
     `<strong>r = ${correlations.total_vs_payment_method.toFixed(3)}</strong><br>${interpretations.total_vs_payment_method}`;
 }
 
 function interpretCorrelation(value, subject, negText, posText) {
   const absValue = Math.abs(value);
   let strength = '';
-  
+
   if (absValue > 0.9) strength = 'muy fuerte';
   else if (absValue > 0.7) strength = 'fuerte';
   else if (absValue > 0.5) strength = 'moderada';
   else if (absValue > 0.3) strength = 'débil';
   else return `${subject} ${negText} la otra variable.`;
-    
+
   const direction = value > 0 ? 'positiva' : 'negativa';
   return `Correlación ${strength} ${direction}. ${subject} ${posText} la otra variable.`;
 }
@@ -339,8 +335,8 @@ function calculateDeviation() {
   const startDate = document.getElementById('startDate').value;
   const endDate = document.getElementById('endDate').value;
 
-  console.log(startDate);
-  
+  (startDate);
+
   if (!startDate || !endDate) {
     alert('Por favor selecciona ambas fechas');
     return;
@@ -363,21 +359,21 @@ function calculateDeviation() {
     },
     body: JSON.stringify(data)
   })
-  .then(response => response.json())
-  .then(data => {
-    if (data.status === 'success') {
-      document.getElementById('deviationResult').style.display = 'block';
-      document.getElementById('deviationValue').textContent = '$' + data.data.toFixed(2);
-      document.getElementById('deviationPeriod').textContent = 
-      `${startDate} a ${endDate}`;
-    } else {
-      alert(data.message || 'Error al calcular la desviación');
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error al calcular la desviación estándar');
-  });
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        document.getElementById('deviationResult').style.display = 'block';
+        document.getElementById('deviationValue').textContent = '$' + data.data.toFixed(2);
+        document.getElementById('deviationPeriod').textContent =
+          `${startDate} a ${endDate}`;
+      } else {
+        alert(data.message || 'Error al calcular la desviación');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error al calcular la desviación estándar');
+    });
 }
 
 function loadModalSelects() {
@@ -398,7 +394,7 @@ function loadModalSelects() {
         paymentSelect.appendChild(newOption);
       }
     }).catch((error) => {
-      console.error("Error al cargar paymentSelect",error)
+      console.error("Error al cargar paymentSelect", error)
     })
 
   fetch(API_URL_PRODUCTS)
@@ -445,7 +441,7 @@ function loadModalSelects() {
       console.error("Error al cargar zoneSelect", error)
     })
 
-  $(document).ready(function(){
+  $(document).ready(function () {
     $('#clientSelect').select2({
       placeholder: "Seleccione un cliente",
       allowClear: true,
@@ -454,25 +450,25 @@ function loadModalSelects() {
     });
   });
 
-    fetch(API_URL_CLIENTS)
-    .then((response)=>{
+  fetch(API_URL_CLIENTS)
+    .then((response) => {
       if (!response.ok) throw new Error("Error en la respuesta del servidor");
       return response.json();
     })
-    .then((data)=>{
+    .then((data) => {
       let clients = data.data;
       const clientsSelect = document.getElementById('clientSelect');
-      
-      clients.forEach((client)=>{
+
+      clients.forEach((client) => {
         const newOption = document.createElement('option');
         newOption.value = client.client_id;
         newOption.text = client.first_name + ' ' + client.last_name;
-        newOption.setAttribute('data-firstname',client.first_name);
-        newOption.setAttribute('data-lastname',client.last_name);
+        newOption.setAttribute('data-firstname', client.first_name);
+        newOption.setAttribute('data-lastname', client.last_name);
         clientsSelect.appendChild(newOption);
-        
+
       })
-      
+
       $('#clientSelect').select2({
         placeholder: "Seleccione un cliente",
         allowClear: true,
@@ -480,42 +476,42 @@ function loadModalSelects() {
         theme: 'bootstrap-5',
         dropdownParent: $('#addModal'),
         tags: true,
-        createTag: function(params){
+        createTag: function (params) {
           var term = $.trim(params.term);
-          if ( term === '') return null;
-          return{
+          if (term === '') return null;
+          return {
             id: 'new_' + term,
             text: term + ' (Nuevo Cliente)',
             newTag: true
           }
         }
-      });      
+      });
 
       $('#clientSelect').on('select2:select', function (e) {
         var data = e.params.data;
 
-        if(data.id.toString().startsWith('new_')){
+        if (data.id.toString().startsWith('new_')) {
           mostrarFormularioNuevoCliente(data.text.replace(' (Nuevo Cliente)', ''))
-        }else{
+        } else {
           ocultarFormularioNuevoCliente();
         }
       });
 
-      $('#clientSelect').on('select2:clear', function(e){
+      $('#clientSelect').on('select2:clear', function (e) {
         ocultarFormularioNuevoCliente();
       })
 
     })
-    .catch((error)=>{
-      console.error("Error al cargar clientsSelect" ,error);
+    .catch((error) => {
+      console.error("Error al cargar clientsSelect", error);
     })
 
   selectsLoaded = true;
 }
 
-function mostrarFormularioNuevoCliente(nombreCompleto){
+function mostrarFormularioNuevoCliente(nombreCompleto) {
   const names = nombreCompleto.split(' ');
-  const firstName =  names[0] || '';
+  const firstName = names[0] || '';
   const lastName = names.slice(1).join(' ') || '';
 
   $('#newClientContainer').slideDown();
@@ -524,7 +520,7 @@ function mostrarFormularioNuevoCliente(nombreCompleto){
   $('#newClientLastName').val(lastName);
 }
 
-function ocultarFormularioNuevoCliente(){
+function ocultarFormularioNuevoCliente() {
   $('#newClientContainer').slideUp();
   $('#newClientName').val('');
   $('#newClientLastName').val('');
@@ -605,7 +601,6 @@ function addClient() {
         }
       }
       return response.json().then((data) => {
-        console.log("Cliente agregada exitosamente: ", data);
 
         const modal = bootstrap.Modal.getInstance(document.getElementById('addClientModal'));
         modal.hide();
@@ -625,10 +620,10 @@ function addClient() {
 
 }
 
-  
+
 function addSale() {
   const clienteSeleccionado = $('#clientSelect').val();
-  
+
   if (clienteSeleccionado && clienteSeleccionado.startsWith('new_')) {
     addNewClientAndSale();
   } else {
@@ -670,30 +665,30 @@ function addNewClientAndSale() {
       "Content-Type": "application/json"
     }
   })
-  .then((response) => {
-    if (!response.ok) {
-      if (response.status === 409) {
-        alert('El email ya está registrado. Por favor, utiliza otro email.');
-        throw new Error('Email duplicado');
+    .then((response) => {
+      if (!response.ok) {
+        if (response.status === 409) {
+          alert('El email ya está registrado. Por favor, utiliza otro email.');
+          throw new Error('Email duplicado');
+        }
+        throw new Error('Error al crear cliente');
       }
-      throw new Error('Error al crear cliente');
-    }
-    return response.json();
-  })
-  .then((clienteCreado) => {
-    console.log("Cliente agregado exitosamente: ", clienteCreado);
-    
-    procesarVenta(clienteCreado.id);
-    
-    ocultarFormularioNuevoCliente();
-  })
-  .catch((error) => {
-    console.error("Error al agregar cliente:", error);
-  });
+      return response.json();
+    })
+    .then((clienteCreado) => {
+      ("Cliente agregado exitosamente: ", clienteCreado);
+
+      procesarVenta(clienteCreado.id);
+
+      ocultarFormularioNuevoCliente();
+    })
+    .catch((error) => {
+      console.error("Error al agregar cliente:", error);
+    });
 }
 
 function procesarVenta(clienteId) {
-  
+
   const clientId = document.getElementById('clientSelect').value;;
   const productSelect = document.getElementById('productSelect');
   const selectedProduct = productSelect.options[productSelect.selectedIndex];
@@ -703,7 +698,7 @@ function procesarVenta(clienteId) {
     alert('Porfavor completa todos los campos')
     return;
   }
-  
+
   const data = {
     client_id: clientId,
     product_id: productSelect.value,
@@ -712,8 +707,8 @@ function procesarVenta(clienteId) {
     unit_price: parseFloat(selectedProduct.dataset.price),
     payment_id: paymentMethod,
   };
-  console.log(data);
-  
+  (data);
+
   fetch(API_URL_ADD, {
     method: "POST",
     body: JSON.stringify(data),
@@ -749,11 +744,11 @@ function procesarVenta(clienteId) {
           });
       }
     })
-  
-  
-  console.log('Procesando venta para cliente:', clienteId);
+
+
+  ('Procesando venta para cliente:', clienteId);
 }
- 
+
 document.addEventListener("DOMContentLoaded", () => {
   const productSelect = document.getElementById('productSelect');
   const quantityInput = document.getElementById('quantityInput');
@@ -907,15 +902,15 @@ function formatDate(dateString) {
 }
 
 function switchTab(tabId, button) {
-    document.querySelectorAll('.tab-content-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    document.querySelectorAll('.google-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    document.getElementById(tabId).classList.add('active');
-    
-    button.classList.add('active');
+  document.querySelectorAll('.tab-content-section').forEach(section => {
+    section.classList.remove('active');
+  });
+
+  document.querySelectorAll('.google-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+
+  document.getElementById(tabId).classList.add('active');
+
+  button.classList.add('active');
 }

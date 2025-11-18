@@ -7,16 +7,26 @@ const API_URL_PRODUCTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_produ
 const API_URL_ADD_CLIENT = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_client.php";
 const API_URL_ZONES = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_zones.php";
 const API_URL_CLIENTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_clients.php";
-
+const API_URL_STADISTICS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_statistics.php"
+const API_URL_CORRELATIONS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_correlations.php"
+const API_URL_DESVIATION = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_desviation.php"
 
 let allSales = [];
 let barChart, doughnutChart;
 let selectsLoaded = false;
 let productsData = [];
 let zonesData = [];
+let averageChart = null;
+let correlationChart = null;
+let statisticsData = null;
+
 document.addEventListener("DOMContentLoaded", () => {
   loadSales();
   loadPayMethodSelect();
+  loadStatistics();
+  loadCorrelations();
+  loadDesviation();
+  setupAverageSelector();
 
   const filterSelect = document.getElementById('filterPayment');
   filterSelect.addEventListener("change", filterSalesByPayment)
@@ -83,6 +93,249 @@ function filterSalesByPayment() {
     }
   })
 
+}
+
+function loadStatistics() {
+  fetch(API_URL_STADISTICS)
+  .then(response => response.json())
+  .then(data =>{
+    if (data.status === 'ok') {
+      statisticsData = data.data;
+      displayAverageChart('day')
+    }
+  })
+  .catch(error=>{
+    console.error('Error al cargar el grafico', error)
+  })
+}
+
+async function setupAverageSelector(){
+  const selector = document.getElementById('averageTypeSelect');
+  if(selector){
+    selector.addEventListener('change',function(){
+      displayAverageChart(this.value);
+    });
+  }
+}
+
+function displayAverageChart(type) {
+  if(!statisticsData) return;
+
+  let data, labels, title;
+
+  switch (type) {
+    case 'day':
+      data = statisticsData['Average by day'];
+      labels = Object.keys(data);
+      title = 'Promedio de Ventas por dia';
+      break;
+    case 'product':
+      data = statisticsData['Average by product'];
+      labels = Object.keys(data);
+      title = 'Promedio de Ventas por productos';
+      break;
+    case 'client':
+      data = statisticsData['Average by client'];
+      labels = Object.keys(data);
+      title = 'Promedio de Ventas por cliente';
+      break;
+  }
+  
+  const values = Object.values(data);
+
+  if(averageChart) averageChart.destroy();
+
+  const ctx = document.getElementById('averageChart').getContext('2d');
+  averageChart = new Chart(ctx,{
+    type: 'bar',
+    data: {
+         labels: labels,
+         datasets: [{
+             label: 'Promedio ($)',
+             data: values,
+             backgroundColor: 'rgba(54, 162, 235, 0.6)',
+             borderColor: 'rgba(54, 162, 235, 1)',
+             borderWidth: 2
+         }]
+     },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        title: {
+          display: true,
+          text: title,
+          font: { size: 16 }
+        },
+        legend: {
+          display: false
+       }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return '$' + value.toFixed(2);
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+function loadCorrelations() {
+  fetch(API_URL_CORRELATIONS)
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'success') {
+      displayCorrelationChart(data.correlations);
+      displayCorrelationInterpretations(data.correlations);
+    }
+  })
+  .catch(error => {
+    console.error('Error al cargar correlaciones:', error);
+  });
+}
+
+function displayCorrelationChart(correlations) {
+  const ctx = document.getElementById('correlationChart').getContext('2d');
+  
+  if (correlationChart) {
+    correlationChart.destroy();
+  }
+
+  const labels = [
+    'Precio vs Cantidad',
+    'Cantidad vs Día',
+    'Total vs Método Pago'
+  ];
+
+  const values = [
+    correlations.price_vs_quantity,
+    correlations.quantity_vs_day_of_week,
+    correlations.total_vs_payment_method
+  ];
+
+  const backgroundColors = values.map(val => {
+    if (val > 0.7) return 'rgba(75, 192, 192, 0.6)';  
+    if (val > 0.3) return 'rgba(54, 162, 235, 0.6)';  
+    if (val > -0.3) return 'rgba(255, 206, 86, 0.6)'; 
+    if (val > -0.7) return 'rgba(255, 159, 64, 0.6)'; 
+    return 'rgba(255, 99, 132, 0.6)'; 
+  });
+
+  correlationChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Coeficiente de Pearson',
+        data: values,
+        backgroundColor: backgroundColors,
+        borderColor: backgroundColors.map(color => color.replace('0.6', '1')),
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Coeficientes de Correlación de Pearson',
+          font: { size: 16 }
+        }
+      },
+      scales: {
+        y: {
+          min: -1,
+          max: 1,
+          ticks: {
+            stepSize: 0.2
+          }
+        }
+      }
+    }
+  });
+}
+
+function displayCorrelationInterpretations(correlations) {
+  const interpretations = {
+    price_vs_quantity: interpretCorrelation(correlations.price_vs_quantity, 
+    'A mayor precio', 'menor cantidad', 'mayor cantidad'),
+    quantity_vs_day_of_week: interpretCorrelation(correlations.quantity_vs_day_of_week,
+    'El día de la semana', 'no influye significativamente en', 'influye en'),
+    total_vs_payment_method: interpretCorrelation(correlations.total_vs_payment_method,
+    'El método de pago', 'no se relaciona con', 'se relaciona con')
+  };
+
+  document.getElementById('corrPriceQuantityText').innerHTML = 
+    `<strong>r = ${correlations.price_vs_quantity.toFixed(3)}</strong><br>${interpretations.price_vs_quantity}`;
+   
+  document.getElementById('corrQuantityDayText').innerHTML = 
+    `<strong>r = ${correlations.quantity_vs_day_of_week.toFixed(3)}</strong><br>${interpretations.quantity_vs_day_of_week}`;
+ 
+  document.getElementById('corrTotalPaymentText').innerHTML = 
+    `<strong>r = ${correlations.total_vs_payment_method.toFixed(3)}</strong><br>${interpretations.total_vs_payment_method}`;
+}
+
+function interpretCorrelation(value, subject, negText, posText) {
+  const absValue = Math.abs(value);
+  let strength = '';
+  
+  if (absValue > 0.9) strength = 'muy fuerte';
+  else if (absValue > 0.7) strength = 'fuerte';
+  else if (absValue > 0.5) strength = 'moderada';
+  else if (absValue > 0.3) strength = 'débil';
+  else return `${subject} ${negText} la otra variable.`;
+    
+  const direction = value > 0 ? 'positiva' : 'negativa';
+  return `Correlación ${strength} ${direction}. ${subject} ${posText} la otra variable.`;
+}
+
+function calculateDeviation() {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+
+  if (!startDate || !endDate) {
+    alert('Por favor selecciona ambas fechas');
+    return;
+  }
+
+  if (startDate === endDate) {
+    alert('Las fechas no pueden ser iguales');
+    return;
+  }
+
+  const data = {
+    origin_date: startDate,
+    end_date: endDate
+  };
+
+  fetch(API_URL_DEVIATION, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'success') {
+      document.getElementById('deviationResult').style.display = 'block';
+      document.getElementById('deviationValue').textContent = '$' + data.data.toFixed(2);
+      document.getElementById('deviationPeriod').textContent = 
+      `${startDate} a ${endDate}`;
+    } else {
+      alert(data.message || 'Error al calcular la desviación');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error al calcular la desviación estándar');
+  });
 }
 
 function loadModalSelects() {
@@ -529,21 +782,18 @@ function updateStadistics(sales) {
 }
 
 function updateCharts(sales) {
-  // Agrupar por producto
   const productData = {};
   sales.forEach((sale) => {
     productData[sale.name] =
       (productData[sale.name] || 0) + parseFloat(sale.total);
   });
 
-  // Agrupar por método de pago
   const paymentData = {};
   sales.forEach((sale) => {
     paymentData[sale.payment_name] =
       (paymentData[sale.payment_name] || 0) + parseFloat(sale.total);
   });
 
-  // Gráfico de barras
   const ctxBar = document.getElementById("myChart");
   if (barChart) barChart.destroy();
   barChart = new Chart(ctxBar, {
@@ -569,7 +819,6 @@ function updateCharts(sales) {
     },
   });
 
-  // Gráfico de dona
   const ctxDoughnut = document.getElementById("doughnut");
   if (doughnutChart) doughnutChart.destroy();
   doughnutChart = new Chart(ctxDoughnut, {
@@ -595,7 +844,6 @@ function updateCharts(sales) {
   });
 }
 
-// Búsqueda
 document.getElementById("searchInput").addEventListener("input", (e) => {
   const searchTerm = e.target.value.toLowerCase();
   const filtered = allSales.filter(
@@ -607,7 +855,6 @@ document.getElementById("searchInput").addEventListener("input", (e) => {
   displaySales(filtered);
 });
 
-// Formatear fecha
 function formatDate(dateString) {
   const date = new Date(dateString);
   return date.toLocaleDateString("es-AR", {

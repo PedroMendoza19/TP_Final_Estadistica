@@ -9,12 +9,8 @@
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-
 </head>
 
 <body>
@@ -78,20 +74,19 @@
         <!-- NAVBAR DE NAVEGACIÓN ESTILO GOOGLE -->
         <nav class="mb-4">
             <div class="google-tabs">
-                <button class="google-tab active" onclick="switchTab('estadisticas', this)">
-                    <i class="fas fa-chart-pie me-2"></i>Estadísticas
-                </button>
                 <button class="google-tab" onclick="switchTab('ventas', this)">
                     <i class="fas fa-table me-2"></i>Registro de Ventas
+                </button>
+                <button class="google-tab active" onclick="switchTab('estadisticas', this)">
+                    <i class="fas fa-chart-pie me-2"></i>Estadísticas
                 </button>
             </div>
         </nav>
 
-                <div id="ventas" class="tab-content-section">
-            <!-- Tabla de Ventas -->
+        <!-- PESTAÑA REGISTRO DE VENTAS -->
+        <div id="ventas" class="tab-content-section">
             <div class="table-container">
                 <h4 class="mb-3"><i class="fas fa-table me-2"></i>Registro de Ventas</h4>
-                <!-- Barra de acciones -->
                 <div class="mb-4">
                     <div class="d-flex gap-2" style="height: 50px;">
                         <input type="text" class="form-control search-box" id="searchInput"
@@ -134,9 +129,10 @@
             </div>
         </div>
 
-        <!-- Graficos -->
+        <!-- PESTAÑA ESTADÍSTICAS -->
         <div id="estadisticas" class="tab-content-section active">
-            <div class="row g-4">
+            <!-- Primera fila: Gráficos originales -->
+            <div class="row g-4 mb-4">
                 <div class="col-lg-8">
                     <div class="chart-container">
                         <h5 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Venta por Producto</h5>
@@ -145,8 +141,102 @@
                 </div>
                 <div class="col-lg-4">
                     <div class="chart-container">
-                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Metodos de Pago</h5>
-                        <canvas id="doughnut" class="mb-4"></canvas>
+                        <h5 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Métodos de Pago</h5>
+                        <canvas class="p-4" id="doughnut"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segunda fila: Promedios -->
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="chart-container">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Análisis Estadístico</h5>
+                            <div style="width: 300px;">
+                                <label class="form-label mb-1">Seleccionar análisis:</label>
+                                <select id="averageTypeSelect" class="form-select">
+                                    <option value="day">Promedio por Día</option>
+                                    <option value="product">Promedio por Producto</option>
+                                    <option value="client">Promedio por Cliente</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <div style="height: 390px; position: relative;">
+                                <canvas id="averageChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tercera fila: Correlaciones y Desviación -->
+            <div class="row g-4 mb-4">
+                <!-- Correlaciones -->
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3"><i class="fas fa-project-diagram me-2"></i>Correlaciones de Pearson</h5>
+                        <canvas id="correlationChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Desviación Estándar -->
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Desviación Estándar</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha Inicio:</label>
+                                <input type="date" id="startDate" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha Fin:</label>
+                                <input type="date" id="endDate" class="form-control">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mb-3" onclick="calculateDeviation()">
+                            <i class="fas fa-calculator me-2"></i>Calcular Desviación
+                        </button>
+                        <div id="deviationResult" class="alert alert-info" style="display: none;">
+                            <h6 class="mb-2">Resultados:</h6>
+                            <p class="mb-1"><strong>Desviación Estándar:</strong> <span id="deviationValue">-</span></p>
+                            <p class="mb-0"><small class="text-muted">Período: <span id="deviationPeriod">-</span></small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cuarta fila: Tarjetas de interpretación -->
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card border-primary">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">
+                                <i class="fas fa-info-circle me-2"></i>Correlación Precio vs Cantidad
+                            </h6>
+                            <p class="card-text" id="corrPriceQuantityText">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-success">
+                        <div class="card-body">
+                            <h6 class="card-title text-success">
+                                <i class="fas fa-info-circle me-2"></i>Correlación Cantidad vs Día
+                            </h6>
+                            <p class="card-text" id="corrQuantityDayText">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h6 class="card-title text-warning">
+                                <i class="fas fa-info-circle me-2"></i>Correlación Total vs Pago
+                            </h6>
+                            <p class="card-text" id="corrTotalPaymentText">Cargando...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -171,39 +261,39 @@
 
                     <!-- Nuevo cliente -->
                     <div id="newClientContainer" style="display: none;" class="border rounded p-3 mb-3 bg-light">
-                    <h6 class="mb-3"><i class="fas fa-user-plus me-2"></i>Datos del nuevo cliente</h6>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nombre *</label>
-                            <input type="text" id="newClientName" class="form-control" required>
+                        <h6 class="mb-3"><i class="fas fa-user-plus me-2"></i>Datos del nuevo cliente</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nombre *</label>
+                                <input type="text" id="newClientName" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Apellido *</label>
+                                <input type="text" id="newClientLastName" class="form-control" required>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Apellido *</label>
-                            <input type="text" id="newClientLastName" class="form-control" required>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="newClientEmail" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Años</label>
+                                <input type="number" id="newClientAge" class="form-control">
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" id="newClientEmail" class="form-control">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Años</label>
-                            <input type="number" id="newClientAge" class="form-control">
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Zona</label>
-                            <select class="form-select" id="zoneSelect">
-                                <option value="">Seleccione una zona...</option>
-                            </select>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Zona</label>
+                                <select class="form-select" id="zoneSelect">
+                                    <option value="">Seleccione una zona...</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
 
                     <div class="mb-3">
                         <label class="form-label">Producto</label>
@@ -235,7 +325,6 @@
                     <button type="button" class="btn btn-primary" onclick="addSale()">
                         <i class="fas fa-save me-2"></i>Guardar Venta
                     </button>
-
                 </div>
             </div>
         </div>
@@ -251,8 +340,6 @@
         
     <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- Script -->

@@ -31,7 +31,7 @@ $sql = "SELECT
 FROM sales s
 INNER JOIN clients c     ON s.client_id   = c.client_id
 INNER JOIN products p    ON s.product_id  = p.product_id
-INNER JOIN payment_methods pay  ON s.payment_id  = pay.payment_id;";
+LEFT JOIN payment_methods pay  ON s.payment_id  = pay.payment_id;";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {

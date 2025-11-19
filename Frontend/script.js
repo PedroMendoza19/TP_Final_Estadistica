@@ -1,15 +1,14 @@
-const API_URL_GET =
-  "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_sales.php";
-
-const API_URL_ADD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_sale.php";
-const API_URL_PAYMENT_METHOD = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_payment_methods.php";
-const API_URL_PRODUCTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_products.php";
-const API_URL_ADD_CLIENT = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/post_client.php";
-const API_URL_ZONES = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_zones.php";
-const API_URL_CLIENTS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_clients.php";
-const API_URL_STATISTICS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_statistics.php"
-const API_URL_CORRELATIONS = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_correlations.php"
-const API_URL_DESVIATION = "http://127.0.0.1:80/TP_FINAL_ESTADISTICA/api/get_desviation.php"
+const API_URL = "http://127.0.0.1:8000";
+const API_URL_GET = `${API_URL}/TP_FINAL_ESTADISTICA/api/get_sales.php`;
+const API_URL_ADD = `${API_URL}/TP_FINAL_ESTADISTICA/api/post_sale.php`;
+const API_URL_PAYMENT_METHOD = `${API_URL}/TP_FINAL_ESTADISTICA/api/get_payment_methods.php`;
+const API_URL_PRODUCTS = `${API_URL}/TP_FINAL_ESTADISTICA/api/get_products.php`;
+const API_URL_ADD_CLIENT = `${API_URL}/TP_FINAL_ESTADISTICA/api/post_client.php`;
+const API_URL_ZONES = `${API_URL}/TP_FINAL_ESTADISTICA/api/get_zones.php`;
+const API_URL_CLIENTS = `${API_URL}/TP_FINAL_ESTADISTICA/api/get_clients.php`;
+const API_URL_STATISTICS = `${API_URL}/TP_FINAL_ESTADISTICA/api/get_statistics.php`;
+const API_URL_CORRELATIONS = `${API_URL}/TP_FINAL_ESTADISTICA/api/get_correlations.php`;
+const API_URL_DESVIATION = `${API_URL}/TP_FINAL_ESTADISTICA/api/get_desviation.php`;
 
 let allSales = [];
 let barChart, doughnutChart;
@@ -42,6 +41,8 @@ function loadSales() {
         displaySales(allSales);
         updateStadistics(allSales);
         updateCharts(allSales);
+        console.log(data);
+        
       }
     })
     .catch((error) => {
@@ -560,66 +561,6 @@ function calcularTotal() {
   }
 }
 
-function addClient() {
-  const first_name = document.getElementById('firstName').value;
-  const last_name = document.getElementById('lastName').value;
-  const email = document.getElementById('email').value;
-  const age = document.getElementById('age').value;
-  const zoneSelect = document.getElementById('zoneSelect').value;
-  let zoneSelectedid;
-  if (!first_name || !last_name || !email || !age || !zoneSelect) {
-    alert('Porfavor completa los campos');
-    return;
-  }
-
-  zonesData.forEach((zone) => {
-    if (zone.zone_id == zoneSelect) {
-      zoneSelectedid = zone.zone_id;
-    }
-  });
-
-  const data = {
-    first_name: first_name,
-    last_name: last_name,
-    email: email,
-    age: age,
-    zone_id: zoneSelectedid
-  }
-
-  fetch(API_URL_ADD_CLIENT, {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json; "
-    }
-  })
-    .then((response) => {
-      if (!response.ok) {
-        if (response.status === 409) {
-          alert('El email ya está registrado. Por favor, utiliza otro email.');
-          return;
-        }
-      }
-      return response.json().then((data) => {
-
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addClientModal'));
-        modal.hide();
-
-        document.getElementById('firstName').value = "";
-        document.getElementById('lastName').value = "";
-        document.getElementById('email').value = "";
-        document.getElementById('age').value = "";
-        document.getElementById('zoneSelect').value = "";
-
-        alert('Cliente registrado/a correctamente!!');
-      })
-        .catch((error) => {
-          console.error("Error al agregar un cliente", error)
-        })
-    })
-
-}
-
 
 function addSale() {
   const clienteSeleccionado = $('#clientSelect').val();
@@ -637,7 +578,7 @@ function addNewClientAndSale() {
   const email = document.getElementById('newClientEmail').value;
   const age = document.getElementById('newClientAge').value;
   const zoneSelect = document.getElementById('zoneSelect').value;
-
+  
   if (!first_name || !last_name || !email || !age || !zoneSelect) {
     alert('Por favor completa todos los campos del cliente');
     return;
@@ -673,23 +614,21 @@ function addNewClientAndSale() {
         }
         throw new Error('Error al crear cliente');
       }
-      return response.json();
-    })
-    .then((clienteCreado) => {
-      ("Cliente agregado exitosamente: ", clienteCreado);
-
-      procesarVenta(clienteCreado.id);
+      return response.json().then((data) => {
+      ("Cliente agregado exitosamente: ", data.data.client_id);      
+      procesarVenta(data.data.client_id);
 
       ocultarFormularioNuevoCliente();
     })
     .catch((error) => {
       console.error("Error al agregar cliente:", error);
     });
+    });
+    
 }
 
-function procesarVenta(clienteId) {
-
-  const clientId = document.getElementById('clientSelect').value;;
+function procesarVenta(clientId) {
+  
   const productSelect = document.getElementById('productSelect');
   const selectedProduct = productSelect.options[productSelect.selectedIndex];
   const quantity = document.getElementById('quantityInput').value;
@@ -707,7 +646,7 @@ function procesarVenta(clienteId) {
     unit_price: parseFloat(selectedProduct.dataset.price),
     payment_id: paymentMethod,
   };
-  (data);
+  console.log(data);
 
   fetch(API_URL_ADD, {
     method: "POST",

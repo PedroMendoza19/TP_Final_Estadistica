@@ -40,9 +40,7 @@ function loadSales() {
         allSales = data.data;
         displaySales(allSales);
         updateStadistics(allSales);
-        updateCharts(allSales);
-        console.log(data);
-        
+        updateCharts(allSales);        
       }
     })
     .catch((error) => {
@@ -646,7 +644,6 @@ function procesarVenta(clientId) {
     unit_price: parseFloat(selectedProduct.dataset.price),
     payment_id: paymentMethod,
   };
-  console.log(data);
 
   fetch(API_URL_ADD, {
     method: "POST",
@@ -685,7 +682,6 @@ function procesarVenta(clientId) {
     })
 
 
-  ('Procesando venta para cliente:', clienteId);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
